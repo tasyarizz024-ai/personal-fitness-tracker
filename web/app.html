@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --dark: #111111; --dark2: #1a1a1a; --dark3: #242424;
+      --border: #2e2e2e; --muted: #555555; --subtle: #888888;
+      --light: #cccccc; --white: #f5f5f5; --pure: #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--black); color: var(--white); min-height: 100vh; }
+    
+    /* LOGIN SCREEN */
+    #login-screen { position: fixed; inset: 0; background: var(--black); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+    .login-box { background: var(--dark); padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; border: 1px solid var(--border); text-align: center; animation: slideUp 0.3s ease; }
+    .login-box h2 { margin-bottom: 8px; color: var(--pure); }
+    .login-box p { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    .login-group { text-align: left; margin-bottom: 16px; }
+
+    .app { display: none; min-height: 100vh; } /* Hidden until login */
+    
+    .sidebar { width: 220px; background: var(--dark); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 15px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pure); }
+    .sidebar-logo p { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .sidebar-nav { padding: 16px 12px; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--subtle); transition: all 0.2s; margin-bottom: 2px; user-select: none; }
+    .nav-item:hover { background: var(--dark2); color: var(--light); }
+    .nav-item.active { background: var(--pure); color: var(--black); font-weight: 600; }
+    .nav-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
+    .user-info { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--pure); }
+    .user-avatar { width: 24px; height: 24px; background: var(--dark3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+    
+    .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--dark); position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 700; color: var(--pure); }
+    .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .btn-add { background: var(--pure); color: var(--black); border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+    .btn-add:hover { opacity: 0.85; }
+    .btn-logout { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s; text-align: center; }
+    .btn-logout:hover { border-color: #ff4444; color: #ff4444; }
+    
+    .content { padding: 32px; flex: 1; }
+    .page { display: none; animation: fadeIn 0.25s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: border-color 0.2s; }
+    .stat-card:hover { border-color: var(--muted); }
+    .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .stat-value { font-size: 36px; font-weight: 800; color: var(--pure); line-height: 1; }
+    .stat-unit { font-size: 13px; color: var(--subtle); margin-top: 6px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--subtle); }
+    .activity-list { display: flex; flex-direction: column; gap: 10px; }
+    .activity-card { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; transition: border-color 0.2s, background 0.2s; }
+    .activity-card:hover { border-color: var(--muted); background: var(--dark2); }
+    .activity-icon { width: 40px; height: 40px; background: var(--dark3); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; font-weight: 700; color: var(--light); }
+    .activity-info { flex: 1; }
+    .activity-name { font-size: 14px; font-weight: 600; color: var(--pure); }
+    .activity-date { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .activity-note { font-size: 12px; color: var(--subtle); margin-top: 4px; font-style: italic; }
+    .activity-duration { font-size: 15px; font-weight: 700; color: var(--pure); }
+    .activity-dur-unit { font-size: 11px; color: var(--muted); font-weight: 400; }
+    .btn-delete { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+    .btn-delete:hover { border-color: #ff4444; color: #ff4444; }
+    .empty-state { text-align: center; padding: 60px 20px; border: 1px dashed var(--border); border-radius: 12px; }
+    .empty-icon { width: 48px; height: 48px; background: var(--dark2); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px; }
+    .empty-state h3 { font-size: 15px; font-weight: 600; color: var(--light); margin-bottom: 6px; }
+    .empty-state p { font-size: 13px; color: var(--muted); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--dark); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.25s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .modal-title { font-size: 17px; font-weight: 700; color: var(--pure); }
+    .btn-close { background: var(--dark2); border: 1px solid var(--border); color: var(--light); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .btn-close:hover { background: var(--dark3); }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--subtle); margin-bottom: 8px; }
+    .form-input, .form-textarea { width: 100%; background: var(--black); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-input:focus, .form-textarea:focus { border-color: var(--pure); }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .sport-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sport-chip { padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--subtle); cursor: pointer; transition: all 0.15s; user-select: none; }
+    .sport-chip:hover { border-color: var(--light); color: var(--light); }
+    .sport-chip.selected { background: var(--pure); color: var(--black); border-color: var(--pure); font-weight: 700; }
+    .form-footer { margin-top: 28px; display: flex; gap: 10px; }
+    .btn-primary { flex: 1; background: var(--pure); color: var(--black); border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary-full { width: 100%; background: var(--pure); color: var(--black); border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+    .btn-primary-full:hover { opacity: 0.88; }
+    .btn-secondary { background: transparent; color: var(--subtle); border: 1px solid var(--border); padding: 13px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { border-color: var(--muted); color: var(--light); }
+    .history-table { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .table-head { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 80px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--dark2); }
+    .th { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 80px; padding: 14px 20px; border-bottom: 1px solid var(--border); align-items: center; transition: background 0.15s; }
+    .table-row:last-child { border-bottom: none; }
+    .table-row:hover { background: var(--dark2); }
+    .td { font-size: 13px; color: var(--light); }
+    .td-name { font-weight: 600; color: var(--pure); }
+    .td-muted { color: var(--muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .notif { position: fixed; bottom: 24px; right: 24px; background: var(--pure); color: var(--black); padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 300; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .notif.show { transform: translateY(0); opacity: 1; }
+    .progress-item { margin-bottom: 14px; }
+    .progress-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .progress-label { font-size: 13px; font-weight: 500; color: var(--light); }
+    .progress-value { font-size: 13px; font-weight: 600; color: var(--pure); }
+    .progress-bar { height: 4px; background: var(--dark3); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--pure); border-radius: 2px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+    .search-bar { background: var(--dark); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; width: 220px; transition: border-color 0.2s; }
+    .search-bar:focus { border-color: var(--muted); }
+    .search-bar::placeholder { color: var(--muted); }
+    .bmi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .bmi-result-card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 32px 24px; display: none; color: var(--pure); }
+    .bmi-result-card.show { display: block; }
+    .gauge-wrapper { position: relative; width: 220px; height: 110px; overflow: hidden; margin: 0 auto 20px; }
+    .gauge { width: 220px; height: 220px; border-radius: 50%; background: conic-gradient(from 270deg, #0ea5e9 0deg 60deg, #22c55e 60deg 120deg, #ef4444 120deg 180deg, transparent 180deg 360deg); mask: radial-gradient(transparent 52%, black 53%); -webkit-mask: radial-gradient(transparent 52%, black 53%); }
+    .gauge-label { position: absolute; font-size: 10px; font-weight: 700; color: #fff; pointer-events: none; }
+    .gl-kurang { top: 55px; left: 16px; transform: rotate(-45deg); }
+    .gl-normal { top: 15px; left: 90px; }
+    .gl-lebih { top: 55px; right: 12px; transform: rotate(45deg); }
+    .gauge-center { position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; }
+    .gauge-center-title { font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+    .gauge-value { font-size: 32px; font-weight: 800; line-height: 1; color: #0ea5e9; }
+    .selisih-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--subtle); margin-top: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; }
+    .selisih-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 24px; }
+    .bmi-full-table { font-size: 11px; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .bmi-ft-row { display: flex; justify-content: space-between; padding: 6px 0; color: var(--light); font-weight: 500; }
+    .bmi-ft-row.active { color: #0ea5e9; font-weight: 700; }
+    .bmi-ft-row.active-normal { color: #22c55e; font-weight: 700; }
+    .bmi-ft-row.active-over { color: #ef4444; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2>Selamat Datang</h2>
+    <p>Silakan login untuk mencatat aktivitas</p>
+    <div class="login-group">
+      <label class="form-label">Nama Pengguna</label>
+      <input type="text" id="login-user" class="form-input" placeholder="Masukkan namamu..." />
+    </div>
+    <div class="login-group">
+      <label class="form-label">Kata Sandi</label>
+      <input type="password" id="login-pass" class="form-input" placeholder="Masukkan sandi..." />
+    </div>
+    <button class="btn-primary-full" onclick="doLogin()">Masuk</button>
+  </div>
+</div>
+
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h1>Fitness</h1>
+      <p>Tracker</p>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" onclick="showPage('dashboard',this)">
+        <div class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('log',this)">
+        <div class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        Catat Aktivitas
+      </div>
+      <div class="nav-item" onclick="showPage('history',this)">
+        <div class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        Riwayat
+      </div>
+      <div class="nav-item" onclick="showPage('bmi',this)">
+        <div class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        Kalkulator BMI
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebar-avatar">U</div>
+        <span id="sidebar-username">User</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Keluar</button>
+    </div>
+  </nav>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="page-title">Dashboard</div>
+        <div class="topbar-sub" id="page-date"></div>
+      </div>
+      <button class="btn-add" onclick="openModal()">+ Tambah Aktivitas</button>
+    </div>
+    <div class="content">
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Total Aktivitas</div><div class="stat-value" id="stat-total">0</div><div class="stat-unit">sesi olahraga</div></div>
+          <div class="stat-card"><div class="stat-label">Total Durasi</div><div class="stat-value" id="stat-duration">0</div><div class="stat-unit">menit</div></div>
+          <div class="stat-card"><div class="stat-label">Aktivitas Hari Ini</div><div class="stat-value" id="stat-today">0</div><div class="stat-unit">sesi</div></div>
+        </div>
+        <div class="section-header"><span class="section-title">Olahraga Terbanyak</span></div>
+        <div id="sport-breakdown" style="margin-bottom:32px;"></div>
+        <hr class="divider"/>
+        <div class="section-header"><span class="section-title">Aktivitas Terbaru</span></div>
+        <div class="activity-list" id="recent-list"></div>
+      </div>
+      <div class="page" id="page-log">
+        <div style="max-width:520px;">
+          <div class="section-header" style="margin-bottom:24px;"><span class="section-title">Form Aktivitas</span></div>
+          <div id="inline-form-container"></div>
+        </div>
+      </div>
+      <div class="page" id="page-history">
+        <div class="section-header">
+          <span class="section-title">Semua Riwayat</span>
+          <input class="search-bar" type="text" id="search-input" placeholder="Cari olahraga..." oninput="renderHistory()"/>
+        </div>
+        <div id="history-container"></div>
+      </div>
+      <div class="page" id="page-bmi">
+        <div class="bmi-grid">
+          <div>
+            <div class="section-header" style="margin-bottom:20px;"><span class="section-title">Hitung BMI</span></div>
+            <div class="form-group"><label class="form-label">Berat Badan (kg)</label><input class="form-input" type="number" id="bmi-weight" placeholder="Contoh: 65"/></div>
+            <div class="form-group"><label class="form-label">Tinggi Badan (cm)</label><input class="form-input" type="number" id="bmi-height" placeholder="Contoh: 170"/></div>
+            <button class="btn-primary-full" onclick="calcBMI()">Hitung BMI</button>
+            <div style="margin-top:24px; font-size:12px; color:var(--muted); line-height:1.6;">
+              Masukkan tinggi dan berat badan untuk melihat Indeks Massa Tubuh (IMT) serta estimasi selisih berat badan idealmu.
+            </div>
+          </div>
+          <div id="bmi-result" class="bmi-result-card">
+            <div class="gauge-wrapper">
+              <div class="gauge"></div>
+              <div class="gauge-label gl-kurang">BB Kurang</div>
+              <div class="gauge-label gl-normal">Normal</div>
+              <div class="gauge-label gl-lebih">BB Berlebih</div>
+              <div class="gauge-center">
+                <div class="gauge-center-title">IMT</div>
+                <div class="gauge-value" id="bmi-number">-</div>
+              </div>
+            </div>
+            
+            <div class="selisih-header"><span>Kategori</span><span>Selisih</span></div>
+            <div class="selisih-row">
+              <span id="bmi-category">-</span>
+              <span id="bmi-selisih">-</span>
+            </div>
+            
+            <div class="bmi-full-table" id="bmi-full-table">
+              <!-- Will be generated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Tambah Aktivitas</div>
+      <button class="btn-close" onclick="closeModal()">x</button>
+    </div>
+    <div class="form-group"><label class="form-label">Pilih Jenis Olahraga</label><div class="sport-chips" id="sport-chips-modal"></div></div>
+    <div class="form-group"><label class="form-label">Durasi (menit)</label><input class="form-input" type="number" id="modal-duration" placeholder="Contoh: 30" min="1"/></div>
+    <div class="form-group"><label class="form-label">Tanggal</label><input class="form-input" type="date" id="modal-date"/></div>
+    <div class="form-group"><label class="form-label">Catatan (opsional)</label><textarea class="form-textarea" id="modal-note" placeholder="Tuliskan catatan aktivitasmu..."></textarea></div>
+    <div class="form-footer">
+      <button class="btn-secondary" onclick="closeModal()">Batal</button>
+      <button class="btn-primary" onclick="saveActivity()">Simpan</button>
+    </div>
+  </div>
+</div>
+<div class="notif" id="notif"></div>
+<script>
+  // ─── LOGIN & LOGOUT ───────────────────────────────────────────────
+  function checkAuth() {
+    const user = localStorage.getItem('ft_user');
+    if (!user) {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.querySelector('.app').style.display = 'none';
+    } else {
+      document.getElementById('login-screen').style.display = 'none';
+      document.querySelector('.app').style.display = 'flex';
+      
+      document.getElementById('sidebar-username').textContent = user;
+      document.getElementById('sidebar-avatar').textContent = user.charAt(0).toUpperCase();
+      
+      // Muat data khusus user ini (disimpan dengan prefix user)
+      const userData = localStorage.getItem('ft_activities_' + user);
+      activities = JSON.parse(userData || '[]');
+      render();
+    }
+  }
+
+  function doLogin() {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value.trim();
+    if (!u) { alert('Nama pengguna tidak boleh kosong!'); return; }
+    if (!p) { alert('Kata sandi tidak boleh kosong!'); return; }
+    
+    localStorage.setItem('ft_user', u);
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+    
+    notify('Berhasil masuk sebagai ' + u);
+    checkAuth();
+  }
+
+  function doLogout() {
+    localStorage.removeItem('ft_user');
+    checkAuth();
+  }
+
+  // ─── DATA & INIT ──────────────────────────────────────────────────
+  const SPORTS = ['Lari','Jalan Kaki','Bersepeda','Renang','Jogging','Senam','Yoga','Badminton','Sepak Bola','Basket','Workout','Hiking','Bela Diri','Tenis','Voli','Lainnya'];
+  let activities = [];
+  let selectedSport = null;
+
+  function init() {
+    const d = new Date();
+    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    document.getElementById('page-date').textContent = days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    document.getElementById('modal-date').value = d.toISOString().split('T')[0];
+    
+    buildModalChips();
+    buildInlineForm();
+    checkAuth();
+    
+    // Allow Enter key to login
+    document.getElementById('login-pass').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') doLogin();
+    });
+  }
+
+  function buildModalChips() {
+    const c = document.getElementById('sport-chips-modal');
+    c.innerHTML = '';
+    SPORTS.forEach(function(s) {
+      const chip = document.createElement('div');
+      chip.className = 'sport-chip';
+      chip.textContent = s;
+      chip.onclick = function() {
+        c.querySelectorAll('.sport-chip').forEach(function(x) { x.classList.remove('selected'); });
+        chip.classList.add('selected');
+        selectedSport = s;
+      };
+      c.appendChild(chip);
+    });
+  }
+
+  function buildInlineForm() {
+    const container = document.getElementById('inline-form-container');
+    let inlineSport = null;
+    const today = new Date().toISOString().split('T')[0];
+    container.innerHTML =
+      '<div class="form-group"><label class="form-label">Pilih Jenis Olahraga</label><div class="sport-chips" id="sc-inline"></div></div>' +
+      '<div class="form-group"><label class="form-label">Durasi (menit)</label><input class="form-input" type="number" id="il-dur" placeholder="Contoh: 30" min="1"/></div>' +
+      '<div class="form-group"><label class="form-label">Tanggal</label><input class="form-input" type="date" id="il-date" value="' + today + '"/></div>' +
+      '<div class="form-group"><label class="form-label">Catatan (opsional)</label><textarea class="form-textarea" id="il-note" placeholder="Tuliskan catatan aktivitasmu..."></textarea></div>' +
+      '<button class="btn-primary-full" onclick="saveInline()">Simpan Aktivitas</button>';
+    
+    const cc = document.getElementById('sc-inline');
+    SPORTS.forEach(function(s) {
+      const chip = document.createElement('div');
+      chip.className = 'sport-chip';
+      chip.textContent = s;
+      chip.onclick = function() {
+        cc.querySelectorAll('.sport-chip').forEach(function(x) { x.classList.remove('selected'); });
+        chip.classList.add('selected');
+        inlineSport = s;
+      };
+      cc.appendChild(chip);
+    });
+    
+    window._getInlineSport = function() { return inlineSport; };
+    window._resetInline = function() {
+      inlineSport = null;
+      cc.querySelectorAll('.sport-chip').forEach(function(x) { x.classList.remove('selected'); });
+      document.getElementById('il-dur').value = '';
+      document.getElementById('il-note').value = '';
+      document.getElementById('il-date').value = new Date().toISOString().split('T')[0];
+    };
+  }
+
+  function saveInline() {
+    const sport = window._getInlineSport();
+    const dur = document.getElementById('il-dur').value;
+    const date = document.getElementById('il-date').value;
+    const note = document.getElementById('il-note').value;
+    if (!sport) { notify('Pilih jenis olahraga terlebih dahulu'); return; }
+    if (!dur || parseInt(dur) <= 0) { notify('Masukkan durasi yang valid'); return; }
+    if (!date) { notify('Pilih tanggal'); return; }
+    
+    activities.unshift({ id: Date.now().toString(), name: sport, duration: parseInt(dur), date: date, note: note.trim() });
+    save(); render(); window._resetInline();
+    notify('Aktivitas berhasil disimpan');
+  }
+
+  function openModal() {
+    selectedSport = null;
+    document.querySelectorAll('#sport-chips-modal .sport-chip').forEach(function(c) { c.classList.remove('selected'); });
+    document.getElementById('modal-duration').value = '';
+    document.getElementById('modal-note').value = '';
+    document.getElementById('modal-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+  document.getElementById('modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+  function saveActivity() {
+    const dur = document.getElementById('modal-duration').value;
+    const date = document.getElementById('modal-date').value;
+    const note = document.getElementById('modal-note').value;
+    if (!selectedSport) { notify('Pilih jenis olahraga terlebih dahulu'); return; }
+    if (!dur || parseInt(dur) <= 0) { notify('Masukkan durasi yang valid'); return; }
+    if (!date) { notify('Pilih tanggal'); return; }
+    
+    activities.unshift({ id: Date.now().toString(), name: selectedSport, duration: parseInt(dur), date: date, note: note.trim() });
+    save(); render(); closeModal();
+    notify('Aktivitas berhasil disimpan');
+  }
+
+  function deleteActivity(id) {
+    if (!confirm('Hapus aktivitas ini?')) return;
+    activities = activities.filter(function(a) { return a.id !== id; });
+    save(); render(); notify('Aktivitas dihapus');
+  }
+
+  function save() {
+    const user = localStorage.getItem('ft_user');
+    if (user) {
+      localStorage.setItem('ft_activities_' + user, JSON.stringify(activities));
+    }
+  }
+
+  function render() { renderStats(); renderBreakdown(); renderRecent(); renderHistory(); }
+
+  function renderStats() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('stat-total').textContent = activities.length;
+    document.getElementById('stat-duration').textContent = activities.reduce(function(s,a) { return s+a.duration; }, 0);
+    document.getElementById('stat-today').textContent = activities.filter(function(a) { return a.date === today; }).length;
+  }
+
+  function renderBreakdown() {
+    const c = document.getElementById('sport-breakdown');
+    if (!activities.length) { c.innerHTML = '<p style="font-size:13px;color:var(--muted);">Belum ada data aktivitas.</p>'; return; }
+    const counts = {};
+    activities.forEach(function(a) { counts[a.name] = (counts[a.name]||0)+1; });
+    const sorted = Object.entries(counts).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+    const max = sorted[0][1];
+    c.innerHTML = sorted.map(function(e) {
+      return '<div class="progress-item"><div class="progress-header"><span class="progress-label">'+e[0]+'</span><span class="progress-value">'+e[1]+' sesi</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+Math.round(e[1]/max*100)+'%"></div></div></div>';
+    }).join('');
+  }
+
+  function fmtDate(ds) {
+    const d = new Date(ds + 'T00:00:00');
+    const m = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function renderRecent() {
+    const c = document.getElementById('recent-list');
+    if (!activities.length) {
+      c.innerHTML = '<div class="empty-state"><div class="empty-icon">+</div><h3>Belum ada aktivitas</h3><p>Klik "Tambah Aktivitas" untuk mulai mencatat</p></div>';
+      return;
+    }
+    c.innerHTML = activities.slice(0,5).map(function(a) {
+      return '<div class="activity-card"><div class="activity-icon">'+a.name[0]+'</div><div class="activity-info"><div class="activity-name">'+a.name+'</div><div class="activity-date">'+fmtDate(a.date)+'</div>'+(a.note?'<div class="activity-note">'+a.note+'</div>':'')+'</div><div class="activity-duration">'+a.duration+' <span class="activity-dur-unit">menit</span></div><button class="btn-delete" onclick="deleteActivity(\''+a.id+'\')">Hapus</button></div>';
+    }).join('');
+  }
+
+  function renderHistory() {
+    const c = document.getElementById('history-container');
+    const q = ((document.getElementById('search-input')||{}).value||'').toLowerCase();
+    const filtered = activities.filter(function(a) { return a.name.toLowerCase().indexOf(q) >= 0; });
+    if (!filtered.length) {
+      c.innerHTML = '<div class="empty-state"><div class="empty-icon">?</div><h3>'+(activities.length?'Tidak ditemukan':'Belum ada riwayat')+'</h3><p>'+(activities.length?'Coba kata kunci lain':'Mulai catat aktivitas olahraga kamu')+'</p></div>';
+      return;
+    }
+    c.innerHTML = '<div class="history-table"><div class="table-head"><div class="th">Olahraga</div><div class="th">Durasi</div><div class="th">Tanggal</div><div class="th">Catatan</div><div class="th"></div></div>'+
+      filtered.map(function(a) {
+        return '<div class="table-row"><div class="td td-name">'+a.name+'</div><div class="td">'+a.duration+' menit</div><div class="td td-muted">'+fmtDate(a.date)+'</div><div class="td td-muted" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:160px;">'+( a.note||'-')+'</div><div class="td" style="text-align:right;"><button class="btn-delete" onclick="deleteActivity(\''+a.id+'\')">Hapus</button></div></div>';
+      }).join('')+'</div>';
+  }
+
+  function showPage(page, el) {
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    document.getElementById('page-'+page).classList.add('active');
+    el.classList.add('active');
+    var titles = {dashboard:'Dashboard',log:'Catat Aktivitas',history:'Riwayat Aktivitas',bmi:'Kalkulator BMI'};
+    document.getElementById('page-title').textContent = titles[page];
+  }
+
+  function calcBMI() {
+    const w = parseFloat(document.getElementById('bmi-weight').value);
+    const h = parseFloat(document.getElementById('bmi-height').value);
+    if (!w||!h||w<=0||h<=0) { notify('Isi berat dan tinggi badan dengan benar'); return; }
+    
+    const hm = h / 100;
+    const bmi = w / (hm * hm);
+    
+    const minNormal = 18.5 * hm * hm;
+    const maxNormal = 24.9 * hm * hm;
+    
+    let selisihText = '-';
+    let cat = '';
+    let colorClass = '';
+    let colorHex = '';
+    
+    if (bmi < 15) { cat = 'Bobot Terlalu Rendah'; colorClass = 'active'; colorHex = '#0ea5e9'; }
+    else if (bmi < 17) { cat = 'Sangat Kurang Bobot'; colorClass = 'active'; colorHex = '#0ea5e9'; }
+    else if (bmi < 18.5) { cat = 'Kurang Bobot'; colorClass = 'active'; colorHex = '#0ea5e9'; }
+    else if (bmi < 25) { cat = 'Normal'; colorClass = 'active-normal'; colorHex = '#22c55e'; }
+    else if (bmi < 30) { cat = 'Kelebihan Bobot'; colorClass = 'active-over'; colorHex = '#ef4444'; }
+    else if (bmi < 35) { cat = 'Obesitas Kelas I'; colorClass = 'active-over'; colorHex = '#ef4444'; }
+    else if (bmi < 40) { cat = 'Obesitas Kelas II'; colorClass = 'active-over'; colorHex = '#ef4444'; }
+    else { cat = 'Obesitas Kelas III'; colorClass = 'active-over'; colorHex = '#ef4444'; }
+
+    if (bmi < 18.5) {
+      selisihText = '+' + (minNormal - w).toFixed(1) + ' kg';
+    } else if (bmi >= 25) {
+      selisihText = '-' + (w - maxNormal).toFixed(1) + ' kg';
+    } else {
+      selisihText = '0 kg';
+    }
+
+    document.getElementById('bmi-number').textContent = bmi.toFixed(1);
+    document.getElementById('bmi-number').style.color = colorHex;
+    document.getElementById('bmi-category').textContent = cat;
+    document.getElementById('bmi-category').style.color = colorHex;
+    document.getElementById('bmi-selisih').textContent = selisihText;
+    document.getElementById('bmi-selisih').style.color = colorHex;
+    
+    const tableData = [
+      { l: 'Bobot Terlalu Rendah', r: '< 15.0', match: bmi < 15 },
+      { l: 'Sangat Kurang Bobot', r: '15.0 - 16.9', match: bmi >= 15 && bmi < 17 },
+      { l: 'Kurang Bobot', r: '17.0 - 18.4', match: bmi >= 17 && bmi < 18.5 },
+      { l: 'Normal', r: '18.5 - 24.9', match: bmi >= 18.5 && bmi < 25 },
+      { l: 'Kelebihan Bobot', r: '25.0 - 29.9', match: bmi >= 25 && bmi < 30 },
+      { l: 'Obesitas Kelas I', r: '30.0 - 34.9', match: bmi >= 30 && bmi < 35 },
+      { l: 'Obesitas Kelas II', r: '35.0 - 39.9', match: bmi >= 35 && bmi < 40 },
+      { l: 'Obesitas Kelas III', r: '≥ 40.0', match: bmi >= 40 }
+    ];
+    
+    let html = '';
+    tableData.forEach(function(row) {
+      let cls = 'bmi-ft-row';
+      if (row.match) cls += ' ' + colorClass;
+      html += '<div class="'+cls+'"><span>'+(row.match ? '▶ ' : '')+row.l+'</span><span>'+row.r+'</span></div>';
+    });
+    
+    html += '<div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border); display:flex; justify-content:space-between; font-weight:700; color:var(--pure);"><span>Bobot Normal</span><span>'+minNormal.toFixed(1)+' - '+maxNormal.toFixed(1)+' kg</span></div>';
+    
+    document.getElementById('bmi-full-table').innerHTML = html;
+    document.getElementById('bmi-result').classList.add('show');
+  }
+
+  function notify(msg) {
+    const el = document.getElementById('notif');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, 2800);
+  }
+
+  window.onload = init;
+</script>
+</body>
+</html>

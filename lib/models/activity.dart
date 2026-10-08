@@ -32,12 +32,14 @@ class Activity {
   final int durationMinutes;
   final double caloriesBurned;
   final DateTime date;
+  final String? note;
 
   Activity({
     required this.id,
     required this.name,
     required this.durationMinutes,
     required this.date,
+    this.note,
     double? caloriesBurned,
   }) : caloriesBurned =
            caloriesBurned ?? estimateCalories(name, durationMinutes);
@@ -51,6 +53,7 @@ class Activity {
       'durationMinutes': durationMinutes,
       'caloriesBurned': caloriesBurned,
       'date': date.toIso8601String(),
+      'note': note,
     };
   }
 
@@ -61,11 +64,15 @@ class Activity {
       durationMinutes: map['durationMinutes'] as int,
       caloriesBurned: (map['caloriesBurned'] as num).toDouble(),
       date: DateTime.parse(map['date'] as String),
+      note: map['note'] as String?,
     );
   }
 
   @override
   String toString() {
-    return 'Activity(id: $id, name: $name, duration: ${durationMinutes}min, calories: ${caloriesBurned.toStringAsFixed(1)} kkal, date: $date)';
+    return 'Activity(id: $id, name: $name, duration: ${durationMinutes}min, calories: ${caloriesBurned.toStringAsFixed(1)} kkal, date: $date, note: $note)';
   }
+
+  factory Activity.fromJson(Map<String, dynamic> json) => Activity.fromMap(json);
+  Map<String, dynamic> toJson() => toMap();
 }
