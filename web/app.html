@@ -1,583 +1,3350 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fitness Tracker</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FitTrack - Personal Fitness Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --black: #0a0a0a; --dark: #111111; --dark2: #1a1a1a; --dark3: #242424;
-      --border: #2e2e2e; --muted: #555555; --subtle: #888888;
-      --light: #cccccc; --white: #f5f5f5; --pure: #ffffff;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--black); color: var(--white); min-height: 100vh; }
-    
-    /* LOGIN SCREEN */
-    #login-screen { position: fixed; inset: 0; background: var(--black); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-    .login-box { background: var(--dark); padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; border: 1px solid var(--border); text-align: center; animation: slideUp 0.3s ease; }
-    .login-box h2 { margin-bottom: 8px; color: var(--pure); }
-    .login-box p { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
-    .login-group { text-align: left; margin-bottom: 16px; }
 
-    .app { display: none; min-height: 100vh; } /* Hidden until login */
-    
-    .sidebar { width: 220px; background: var(--dark); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
-    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
-    .sidebar-logo h1 { font-size: 15px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pure); }
-    .sidebar-logo p { font-size: 11px; color: var(--muted); margin-top: 3px; }
-    .sidebar-nav { padding: 16px 12px; flex: 1; }
-    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--subtle); transition: all 0.2s; margin-bottom: 2px; user-select: none; }
-    .nav-item:hover { background: var(--dark2); color: var(--light); }
-    .nav-item.active { background: var(--pure); color: var(--black); font-weight: 600; }
-    .nav-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
-    .user-info { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--pure); }
-    .user-avatar { width: 24px; height: 24px; background: var(--dark3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-    
-    .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
-    .topbar { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--dark); position: sticky; top: 0; z-index: 50; }
-    .topbar-title { font-size: 16px; font-weight: 700; color: var(--pure); }
-    .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .btn-add { background: var(--pure); color: var(--black); border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-    .btn-add:hover { opacity: 0.85; }
-    .btn-logout { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.2s; text-align: center; }
-    .btn-logout:hover { border-color: #ff4444; color: #ff4444; }
-    
-    .content { padding: 32px; flex: 1; }
-    .page { display: none; animation: fadeIn 0.25s ease; }
-    .page.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
-    .stat-card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: border-color 0.2s; }
-    .stat-card:hover { border-color: var(--muted); }
-    .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .stat-value { font-size: 36px; font-weight: 800; color: var(--pure); line-height: 1; }
-    .stat-unit { font-size: 13px; color: var(--subtle); margin-top: 6px; }
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .section-title { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--subtle); }
-    .activity-list { display: flex; flex-direction: column; gap: 10px; }
-    .activity-card { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; transition: border-color 0.2s, background 0.2s; }
-    .activity-card:hover { border-color: var(--muted); background: var(--dark2); }
-    .activity-icon { width: 40px; height: 40px; background: var(--dark3); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; font-weight: 700; color: var(--light); }
-    .activity-info { flex: 1; }
-    .activity-name { font-size: 14px; font-weight: 600; color: var(--pure); }
-    .activity-date { font-size: 12px; color: var(--muted); margin-top: 3px; }
-    .activity-note { font-size: 12px; color: var(--subtle); margin-top: 4px; font-style: italic; }
-    .activity-duration { font-size: 15px; font-weight: 700; color: var(--pure); }
-    .activity-dur-unit { font-size: 11px; color: var(--muted); font-weight: 400; }
-    .btn-delete { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
-    .btn-delete:hover { border-color: #ff4444; color: #ff4444; }
-    .empty-state { text-align: center; padding: 60px 20px; border: 1px dashed var(--border); border-radius: 12px; }
-    .empty-icon { width: 48px; height: 48px; background: var(--dark2); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px; }
-    .empty-state h3 { font-size: 15px; font-weight: 600; color: var(--light); margin-bottom: 6px; }
-    .empty-state p { font-size: 13px; color: var(--muted); }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: var(--dark); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.25s ease; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-    .modal-title { font-size: 17px; font-weight: 700; color: var(--pure); }
-    .btn-close { background: var(--dark2); border: 1px solid var(--border); color: var(--light); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-    .btn-close:hover { background: var(--dark3); }
-    .form-group { margin-bottom: 20px; }
-    .form-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--subtle); margin-bottom: 8px; }
-    .form-input, .form-textarea { width: 100%; background: var(--black); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
-    .form-input:focus, .form-textarea:focus { border-color: var(--pure); }
-    .form-textarea { resize: vertical; min-height: 80px; }
-    .sport-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .sport-chip { padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--subtle); cursor: pointer; transition: all 0.15s; user-select: none; }
-    .sport-chip:hover { border-color: var(--light); color: var(--light); }
-    .sport-chip.selected { background: var(--pure); color: var(--black); border-color: var(--pure); font-weight: 700; }
-    .form-footer { margin-top: 28px; display: flex; gap: 10px; }
-    .btn-primary { flex: 1; background: var(--pure); color: var(--black); border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-    .btn-primary:hover { opacity: 0.88; }
-    .btn-primary-full { width: 100%; background: var(--pure); color: var(--black); border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
-    .btn-primary-full:hover { opacity: 0.88; }
-    .btn-secondary { background: transparent; color: var(--subtle); border: 1px solid var(--border); padding: 13px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-    .btn-secondary:hover { border-color: var(--muted); color: var(--light); }
-    .history-table { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .table-head { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 80px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--dark2); }
-    .th { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-    .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 80px; padding: 14px 20px; border-bottom: 1px solid var(--border); align-items: center; transition: background 0.15s; }
-    .table-row:last-child { border-bottom: none; }
-    .table-row:hover { background: var(--dark2); }
-    .td { font-size: 13px; color: var(--light); }
-    .td-name { font-weight: 600; color: var(--pure); }
-    .td-muted { color: var(--muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    .notif { position: fixed; bottom: 24px; right: 24px; background: var(--pure); color: var(--black); padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 300; transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .notif.show { transform: translateY(0); opacity: 1; }
-    .progress-item { margin-bottom: 14px; }
-    .progress-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
-    .progress-label { font-size: 13px; font-weight: 500; color: var(--light); }
-    .progress-value { font-size: 13px; font-weight: 600; color: var(--pure); }
-    .progress-bar { height: 4px; background: var(--dark3); border-radius: 2px; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--pure); border-radius: 2px; }
-    .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
-    .search-bar { background: var(--dark); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; width: 220px; transition: border-color 0.2s; }
-    .search-bar:focus { border-color: var(--muted); }
-    .search-bar::placeholder { color: var(--muted); }
-    .bmi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .bmi-result-card { background: var(--dark); border: 1px solid var(--border); border-radius: 12px; padding: 32px 24px; display: none; color: var(--pure); }
-    .bmi-result-card.show { display: block; }
-    .gauge-wrapper { position: relative; width: 220px; height: 110px; overflow: hidden; margin: 0 auto 20px; }
-    .gauge { width: 220px; height: 220px; border-radius: 50%; background: conic-gradient(from 270deg, #0ea5e9 0deg 60deg, #22c55e 60deg 120deg, #ef4444 120deg 180deg, transparent 180deg 360deg); mask: radial-gradient(transparent 52%, black 53%); -webkit-mask: radial-gradient(transparent 52%, black 53%); }
-    .gauge-label { position: absolute; font-size: 10px; font-weight: 700; color: #fff; pointer-events: none; }
-    .gl-kurang { top: 55px; left: 16px; transform: rotate(-45deg); }
-    .gl-normal { top: 15px; left: 90px; }
-    .gl-lebih { top: 55px; right: 12px; transform: rotate(45deg); }
-    .gauge-center { position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; }
-    .gauge-center-title { font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
-    .gauge-value { font-size: 32px; font-weight: 800; line-height: 1; color: #0ea5e9; }
-    .selisih-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--subtle); margin-top: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; }
-    .selisih-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 24px; }
-    .bmi-full-table { font-size: 11px; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
-    .bmi-ft-row { display: flex; justify-content: space-between; padding: 6px 0; color: var(--light); font-weight: 500; }
-    .bmi-ft-row.active { color: #0ea5e9; font-weight: 700; }
-    .bmi-ft-row.active-normal { color: #22c55e; font-weight: 700; }
-    .bmi-ft-row.active-over { color: #ef4444; font-weight: 700; }
+    :root {
+      /* Brand Color Palette exact to design */
+      --primary-purple: #5844eb;
+      --primary-purple-hover: #4733db;
+      --primary-purple-light: #f1effe;
+      --primary-purple-subtle: #eae7fd;
+
+      --accent-lime: #d2fb52;
+      --accent-lime-hover: #c3ec43;
+      --accent-lime-light: #eefdc1;
+      --accent-lime-text: #274005;
+
+      --bg-app: #f7f8fc;
+      --bg-card: #ffffff;
+      --bg-card-subtle: #f8f9fe;
+
+      --text-dark: #121626;
+      --text-body: #3c4456;
+      --text-secondary: #6e7787;
+      --text-muted: #959fad;
+
+      --border-light: #eef1f6;
+      --border-accent: rgba(88, 68, 235, 0.2);
+
+      --pill-cyan: #e2f8fb;
+      --pill-cyan-text: #0284c7;
+      --pill-peach: #feede9;
+      --pill-peach-text: #ea580c;
+      --pill-dark: #1b2232;
+
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 24px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 2px 10px rgba(100, 105, 140, 0.04);
+      --shadow-card: 0 8px 24px rgba(110, 115, 160, 0.06);
+      --shadow-float: 0 12px 32px rgba(88, 68, 235, 0.15);
+      --shadow-lime: 0 8px 20px rgba(210, 251, 82, 0.45);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #eef0f8;
+      background-image: radial-gradient(circle at 10% 20%, rgba(88, 68, 235, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(210, 251, 82, 0.08) 0%, transparent 45%);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Outer Wrapper for Desktop Phone Frame simulation */
+    .app-viewport {
+      width: 100%;
+      max-width: 440px;
+      min-height: 100vh;
+      background: var(--bg-app);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(20, 25, 45, 0.12);
+      overflow-x: hidden;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 500px) {
+      body {
+        padding: 24px 0 60px;
+      }
+      .app-viewport {
+        border-radius: 40px;
+        min-height: 920px;
+        border: 8px solid #ffffff;
+        box-shadow: 0 25px 70px rgba(25, 30, 60, 0.16);
+      }
+    }
+
+    /* Screen Views Container */
+    .screen-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 110px; /* Space for floating bottom nav */
+    }
+
+    .app-screen {
+      display: none;
+      animation: screenFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .app-screen.active {
+      display: block;
+    }
+
+    @keyframes screenFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* TOP HEADER BAR */
+    .top-header {
+      padding: 18px 24px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-app);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .brand-logo-infinity {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-logo-infinity svg {
+      width: 22px;
+      height: 22px;
+      color: var(--primary-purple);
+    }
+
+    .brand-texts {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: #2b2f42;
+    }
+
+    .brand-page-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: capitalize;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-icon-header {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2b2f42;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .btn-icon-header:hover {
+      background: #f8f9ff;
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      width: 7px;
+      height: 7px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 1.5px solid #ffffff;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1.5px solid #ffffff;
+    }
+
+    .online-indicator {
+      position: absolute;
+      bottom: 0px;
+      right: 0px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #84cc16;
+      border: 2px solid #ffffff;
+    }
+
+    /* GREETING SECTION (HOME) */
+    .home-greeting-row {
+      padding: 10px 24px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .greeting-texts h1 {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .greeting-texts p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    /* PURPLE HERO CARD */
+    .hero-purple-card {
+      margin: 4px 20px 20px;
+      background: linear-gradient(135deg, #5b46ec 0%, #765ff6 100%);
+      border-radius: 28px;
+      padding: 24px;
+      color: #ffffff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 14px 34px rgba(91, 70, 236, 0.32);
+    }
+
+    .hero-purple-card::before {
+      content: '';
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+      top: -40px;
+      right: -30px;
+      pointer-events: none;
+    }
+
+    .hero-top-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .hero-subhead {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-bottom: 2px;
+    }
+
+    .hero-main-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-pill-badge {
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      white-space: nowrap;
+    }
+
+    /* CIRCLE PROGRESS */
+    .hero-circle-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0 22px;
+    }
+
+    .circle-progress-wrapper {
+      position: relative;
+      width: 150px;
+      height: 150px;
+    }
+
+    .circle-progress-wrapper svg {
+      width: 150px;
+      height: 150px;
+      transform: rotate(-90deg);
+    }
+
+    .progress-bg-track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.18);
+      stroke-width: 14;
+    }
+
+    .progress-bar-fill {
+      fill: none;
+      stroke: var(--accent-lime);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 408;
+      stroke-dashoffset: 143; /* 65% progress */
+      transition: stroke-dashoffset 0.8s ease;
+    }
+
+    .circle-center-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .circle-val-num {
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .circle-val-caption {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.88);
+      margin-top: 2px;
+    }
+
+    .hero-inner-banner {
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #ffffff;
+    }
+
+    .hero-inner-banner svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent-lime);
+      flex-shrink: 0;
+    }
+
+    /* 2 METRIC CARDS ROW */
+    .metrics-dual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding: 0 20px 18px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 140px;
+    }
+
+    .metric-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .metric-icon-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .metric-icon-box.cyan {
+      background: #e6f9fa;
+      color: #0284c7;
+    }
+
+    .metric-icon-box.coral {
+      background: #feece8;
+      color: #e11d48;
+    }
+
+    .metric-main-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin: 10px 0 6px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .metric-main-value span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .metric-sparkline {
+      height: 28px;
+      width: 100%;
+      margin: 4px 0 8px;
+    }
+
+    .metric-sparkline svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .metric-bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 26px;
+      margin: 4px 0 8px;
+    }
+
+    .mini-bar {
+      flex: 1;
+      background: #e2e8f8;
+      border-radius: 3px;
+      transition: height 0.3s;
+    }
+
+    .mini-bar.highlight {
+      background: var(--accent-lime);
+    }
+
+    .metric-badge-pill {
+      align-self: flex-start;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .metric-badge-pill.lime {
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+    }
+
+    .metric-badge-pill.peach {
+      background: #fdeee9;
+      color: #ea580c;
+    }
+
+    /* STREAK CARD */
+    .streak-banner-card {
+      margin: 0 20px 22px;
+      background: #f4f5fd;
+      border: 1px solid #e7e9f8;
+      border-radius: 20px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .streak-banner-card:active {
+      transform: scale(0.99);
+    }
+
+    .streak-icon-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--accent-lime);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-lime-text);
+      flex-shrink: 0;
+    }
+
+    .streak-info {
+      flex: 1;
+    }
+
+    .streak-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .streak-sub {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .streak-arrow {
+      color: var(--primary-purple);
+      display: flex;
+      align-items: center;
+    }
+
+    /* ACTIVITY HISTORY SECTION */
+    .section-header-row {
+      padding: 0 24px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-main-heading {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .section-link-action {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--primary-purple);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .activity-list-wrapper {
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .activity-item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .activity-item-card:hover {
+      box-shadow: var(--shadow-card);
+      border-color: #e2e8f8;
+    }
+
+    .activity-icon-sq {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .activity-icon-sq.green {
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+    }
+
+    .activity-icon-sq.cyan {
+      background: #dff6f9;
+      color: #0284c7;
+    }
+
+    .activity-icon-sq.pink {
+      background: #fdecee;
+      color: #e11d48;
+    }
+
+    .activity-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .activity-name-row {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .activity-meta-row {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .activity-time-stamp {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .activity-arrow-chevron {
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+    }
+
+    /* LIME ADD ACTIVITY BUTTON (HOME) */
+    .home-action-btn-row {
+      padding: 0 20px 24px;
+    }
+
+    .btn-lime-full {
+      width: 100%;
+      background: var(--accent-lime);
+      color: var(--text-dark);
+      border: none;
+      padding: 16px 20px;
+      border-radius: var(--radius-full);
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow-lime);
+      transition: all 0.2s;
+    }
+
+    .btn-lime-full:hover {
+      background: var(--accent-lime-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-lime-full:active {
+      transform: scale(0.99);
+    }
+
+    /* SCREEN 1: TAMBAH AKTIVITAS STYLES */
+    .screen-header-back {
+      padding: 10px 24px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .btn-round-back {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #eef2fa;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dark);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .btn-round-back:hover {
+      background: #e2e8f5;
+    }
+
+    .screen-title-area h2 {
+      font-size: 21px;
+      font-weight: 900;
+      color: var(--text-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .screen-title-area p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* SPORT SELECTOR GRID */
+    .sport-grid-wrapper {
+      padding: 0 20px 22px;
+    }
+
+    .sport-grid-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .sport-grid-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .sport-grid-count {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary-purple);
+    }
+
+    .sport-grid-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+    }
+
+    .sport-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .sport-select-card {
+      background: var(--bg-card);
+      border: 1.5px solid transparent;
+      border-radius: 20px;
+      padding: 16px 10px 14px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sport-select-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .sport-select-card.selected {
+      background: #f1effe;
+      border-color: rgba(88, 68, 235, 0.4);
+      box-shadow: 0 8px 20px rgba(88, 68, 235, 0.12);
+    }
+
+    .sport-icon-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #f3f5fa;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+
+    .sport-select-card.selected .sport-icon-circle {
+      background: var(--primary-purple);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(88, 68, 235, 0.35);
+    }
+
+    .sport-card-check {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .sport-select-card.selected .sport-card-check {
+      display: flex;
+    }
+
+    .sport-card-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .sport-select-card.selected .sport-card-name {
+      color: var(--primary-purple);
+    }
+
+    .sport-card-rate {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    /* DURATION CARD */
+    .add-act-card {
+      margin: 0 20px 18px;
+      background: var(--bg-card);
+      border-radius: 26px;
+      padding: 22px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-row-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card-head-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-head-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #f1effe;
+      color: var(--primary-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-head-icon.peach {
+      background: #feece8;
+      color: #ea580c;
+    }
+
+    .card-title-text {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .card-target-badge {
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    /* BIG STEPPER */
+    .big-stepper-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-step-square {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: #edf0fa;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-step-square:hover {
+      background: #e1e6f5;
+    }
+
+    .btn-step-square:active {
+      transform: scale(0.95);
+    }
+
+    .stepper-middle-val {
+      text-align: center;
+    }
+
+    .stepper-big-digits {
+      font-size: 40px;
+      font-weight: 900;
+      color: var(--text-dark);
+      line-height: 1;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .stepper-big-digits span {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .stepper-sub-note {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .green-dot-bullet {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #65a30d;
+    }
+
+    /* QUICK DURATION PILLS */
+    .quick-pills-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .pill-quick-opt {
+      padding: 10px 4px;
+      border-radius: var(--radius-full);
+      background: #f1f4fb;
+      border: 1px solid transparent;
+      text-align: center;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pill-quick-opt:hover {
+      background: #e8ecf6;
+    }
+
+    .pill-quick-opt.active {
+      background: var(--primary-purple);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(88, 68, 235, 0.3);
+    }
+
+    /* ESTIMASI KALORI TERBAKAR CARD */
+    .calorie-est-number {
+      font-size: 44px;
+      font-weight: 900;
+      color: var(--primary-purple);
+      line-height: 1.1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .calorie-est-number span {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary-purple);
+    }
+
+    .calorie-est-desc {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .calorie-tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .calorie-tag-pill {
+      background: #f1effe;
+      color: var(--primary-purple);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ACTION BUTTONS (ADD ACTIVITY) */
+    .add-activity-footer {
+      padding: 6px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-save-activity {
+      width: 100%;
+      background: var(--primary-purple);
+      color: #ffffff;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 18px;
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(88, 68, 235, 0.35);
+      transition: all 0.2s;
+    }
+
+    .btn-save-activity:hover {
+      background: var(--primary-purple-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-save-activity:active {
+      transform: scale(0.99);
+    }
+
+    .btn-cancel-flat {
+      background: transparent;
+      border: none;
+      color: var(--text-dark);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-cancel-flat:hover {
+      color: var(--primary-purple);
+    }
+
+    /* SCREEN 2: BMI CALCULATOR STYLES */
+    .bmi-sub-title-purple {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--primary-purple);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .bmi-gender-toggle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 18px;
+    }
+
+    .btn-gender-pill {
+      padding: 12px;
+      border-radius: var(--radius-full);
+      background: #f1f4fb;
+      border: none;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-gender-pill.active {
+      background: var(--primary-purple);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(88, 68, 235, 0.3);
+    }
+
+    .bmi-input-row {
+      margin-bottom: 18px;
+    }
+
+    .bmi-input-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .bmi-input-label-text {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .bmi-unit-pill {
+      background: #f1effe;
+      color: var(--primary-purple);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .bmi-stepper-control {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8f9fe;
+      border-radius: 18px;
+      padding: 6px 8px;
+      border: 1px solid var(--border-light);
+    }
+
+    .bmi-stepper-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-dark);
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .bmi-stepper-value span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .btn-calc-bmi {
+      width: 100%;
+      background: var(--primary-purple);
+      color: #ffffff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 16px;
+      font-size: 14.5px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow: 0 6px 20px rgba(88, 68, 235, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-calc-bmi:hover {
+      background: var(--primary-purple-hover);
+    }
+
+    /* BMI RESULT CARD */
+    .bmi-result-card {
+      margin: 0 20px 18px;
+      background: var(--bg-card);
+      border-radius: 26px;
+      padding: 22px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-card);
+    }
+
+    .analysis-head-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .analysis-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .analysis-subhead {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-top: 2px;
+    }
+
+    .bmi-badge-normal {
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .bmi-score-big-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .bmi-score-val {
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--text-dark);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .bmi-score-val span {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary-purple);
+    }
+
+    .badge-kondisi-prima {
+      background: #1b2232;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* GAUGE BAR */
+    .gauge-track-container {
+      margin: 12px 0 6px;
+      position: relative;
+    }
+
+    .gauge-multi-bar {
+      height: 10px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, #93c5fd 0%, #a7f3d0 25%, #d2fb52 45%, #fed7aa 75%, #fca5a5 100%);
+      position: relative;
+    }
+
+    .gauge-indicator-pin {
+      position: absolute;
+      top: -6px;
+      left: 36%; /* Default for 20.6 */
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: left 0.5s ease;
+    }
+
+    .gauge-pin-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--primary-purple);
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .gauge-pin-stem {
+      width: 2px;
+      height: 14px;
+      background: var(--primary-purple);
+    }
+
+    .gauge-labels-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      text-align: center;
+      margin-top: 14px;
+      margin-bottom: 18px;
+    }
+
+    .gauge-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .gauge-col-title {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .gauge-col-title.kurus { color: #64748b; }
+    .gauge-col-title.normal { color: #1e293b; font-weight: 900; }
+    .gauge-col-title.lebih { color: #334155; }
+    .gauge-col-title.obesitas { color: #dc2626; }
+
+    .gauge-col-range {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* IDEAL WEIGHT ROW */
+    .ideal-weight-box {
+      background: #f8f9fe;
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .ideal-weight-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ideal-icon-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #f1effe;
+      color: var(--primary-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ideal-label-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .ideal-range-text {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--primary-purple);
+    }
+
+    /* ADVICE CALLOUT */
+    .advice-callout-card {
+      background: #f6f5fe;
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .advice-bulb-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .advice-content h5 {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .advice-content p {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* SAVE BMI ACTION CARD */
+    .save-bmi-card {
+      margin: 0 20px 24px;
+      background: #f1effe;
+      border-radius: 20px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .save-bmi-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary-purple);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .save-bmi-texts {
+      flex: 1;
+    }
+
+    .save-bmi-texts h4 {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .save-bmi-texts p {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .btn-save-lime-sm {
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+      border: none;
+      padding: 9px 18px;
+      border-radius: var(--radius-full);
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(210, 251, 82, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-save-lime-sm:hover {
+      background: var(--accent-lime-hover);
+    }
+
+    /* SCREEN 3: SESI LATIHAN AKTIF / FOOD RECOMMENDATION STYLES */
+    .congrats-banner-card {
+      margin: 0 20px 22px;
+      background: linear-gradient(135deg, #e4e2fd 0%, #f4fbf0 100%);
+      border-radius: 28px;
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(88, 68, 235, 0.15);
+    }
+
+    .sparkle-decor {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-size: 26px;
+      color: #8b75f8;
+      opacity: 0.8;
+    }
+
+    .congrats-badge-sub {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary-purple);
+      margin-bottom: 6px;
+    }
+
+    .congrats-title {
+      font-size: 19px;
+      font-weight: 900;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+    }
+
+    .congrats-cal-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+      padding: 7px 16px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .food-section-container {
+      padding: 0 20px 24px;
+    }
+
+    .food-section-head {
+      margin-bottom: 14px;
+    }
+
+    .food-head-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .dot-purple-title {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary-purple);
+    }
+
+    .food-head-desc {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .food-filter-pills-row {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0 20px;
+    }
+
+    .food-tab-pill {
+      padding: 10px 18px;
+      border-radius: var(--radius-full);
+      background: #f1f4fb;
+      border: none;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .food-tab-pill.active {
+      background: var(--primary-purple);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(88, 68, 235, 0.3);
+    }
+
+    /* FOOD CARD */
+    .food-card-item {
+      background: var(--bg-card);
+      border-radius: 22px;
+      padding: 14px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+      position: relative;
+      transition: transform 0.2s;
+    }
+
+    .food-card-item:hover {
+      box-shadow: var(--shadow-card);
+    }
+
+    .food-thumb-wrap {
+      width: 86px;
+      height: 86px;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+      background: #eef2fa;
+    }
+
+    .food-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .btn-fav-heart {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(4px);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-fav-heart.active {
+      color: #ef4444;
+      background: #ffffff;
+    }
+
+    .food-info-col {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .food-cat-meta {
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+    }
+
+    .food-title-h4 {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin: 2px 0 6px;
+      line-height: 1.3;
+    }
+
+    .food-tags-duo {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .badge-food-protein {
+      background: var(--accent-lime);
+      color: var(--accent-lime-text);
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .badge-food-cal {
+      background: #dff6f9;
+      color: #0284c7;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .food-brief-snippet {
+      font-size: 11px;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .food-screen-footer {
+      padding: 8px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-purple-full {
+      width: 100%;
+      background: var(--primary-purple);
+      color: #ffffff;
+      border: none;
+      padding: 16px 20px;
+      border-radius: var(--radius-full);
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(88, 68, 235, 0.35);
+      transition: all 0.2s;
+    }
+
+    .btn-purple-full:hover {
+      background: var(--primary-purple-hover);
+    }
+
+    .btn-bookmark-link {
+      background: transparent;
+      border: none;
+      color: var(--text-dark);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .btn-bookmark-link svg {
+      color: var(--primary-purple);
+    }
+
+    /* FLOATING BOTTOM NAVIGATION BAR (EXACT TO DESIGN) */
+    .bottom-nav-dock {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 440px;
+      background: #ffffff;
+      border-top: 1px solid var(--border-light);
+      border-top-left-radius: 28px;
+      border-top-right-radius: 28px;
+      padding: 10px 32px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 -8px 24px rgba(40, 50, 80, 0.06);
+      z-index: 100;
+    }
+
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 11.5px;
+      font-weight: 700;
+      transition: all 0.2s;
+      min-width: 60px;
+    }
+
+    .nav-tab-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2.2;
+    }
+
+    .nav-tab-btn.active {
+      color: var(--primary-purple);
+    }
+
+    .nav-fab-center {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--accent-lime);
+      color: var(--text-dark);
+      border: 4px solid #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(210, 251, 82, 0.6);
+      cursor: pointer;
+      margin-top: -30px;
+      transition: all 0.2s;
+    }
+
+    .nav-fab-center:hover {
+      background: var(--accent-lime-hover);
+      transform: scale(1.05);
+    }
+
+    .nav-fab-center:active {
+      transform: scale(0.95);
+    }
+
+    .nav-fab-center svg {
+      width: 28px;
+      height: 28px;
+      stroke-width: 2.5;
+    }
+
+    /* MODAL: RIWAYAT LENGKAP */
+    .history-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 22, 38, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .history-modal-overlay.open {
+      display: flex;
+    }
+
+    .history-modal-sheet {
+      width: 100%;
+      max-width: 440px;
+      max-height: 85vh;
+      background: #ffffff;
+      border-top-left-radius: 32px;
+      border-top-right-radius: 32px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: sheetSlideUp 0.25s ease-out;
+    }
+
+    @keyframes sheetSlideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .sheet-handle-bar {
+      width: 40px;
+      height: 5px;
+      background: #cbd5e1;
+      border-radius: var(--radius-full);
+      margin: 12px auto 6px;
+    }
+
+    .sheet-header-title {
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .sheet-header-title h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .sheet-body-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px 30px;
+    }
+
+    .history-filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .history-search-input {
+      flex: 1;
+      background: #f1f4fb;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-full);
+      padding: 10px 16px;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .history-select-dropdown {
+      background: #f1f4fb;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-full);
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dark);
+      outline: none;
+      font-family: inherit;
+    }
+
+    /* TOAST POPUP */
+    .toast-pill-notification {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-30px);
+      background: #182030;
+      color: #ffffff;
+      padding: 12px 22px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast-pill-notification.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon-lime {
+      width: 18px;
+      height: 18px;
+      color: var(--accent-lime);
+    }
   </style>
 </head>
+
 <body>
+  <div class="app-viewport">
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen">
-  <div class="login-box">
-    <h2>Selamat Datang</h2>
-    <p>Silakan login untuk mencatat aktivitas</p>
-    <div class="login-group">
-      <label class="form-label">Nama Pengguna</label>
-      <input type="text" id="login-user" class="form-input" placeholder="Masukkan namamu..." />
-    </div>
-    <div class="login-group">
-      <label class="form-label">Kata Sandi</label>
-      <input type="password" id="login-pass" class="form-input" placeholder="Masukkan sandi..." />
-    </div>
-    <button class="btn-primary-full" onclick="doLogin()">Masuk</button>
-  </div>
-</div>
+    <!-- TOP HEADER BAR -->
+    <header class="top-header">
+      <div class="brand-group" onclick="navigateToScreen('screen-home')">
+        <div class="brand-logo-infinity">
+          <!-- Infinity Loop SVG -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18.178 8c5.096 0 5.096 8 0 8-2.68 0-4.7-2.68-6.178-5.32C10.522 8 8.5 5.32 5.822 5.32 1.726 5.32 1.726 13.32 5.822 13.32c2.68 0 4.7-2.68 6.178-5.32" />
+          </svg>
+        </div>
+        <div class="brand-texts">
+          <span class="brand-title">FITTRACK</span>
+          <span class="brand-page-label" id="header-page-title">Beranda</span>
+        </div>
+      </div>
 
-<div class="app">
-  <nav class="sidebar">
-    <div class="sidebar-logo">
-      <h1>Fitness</h1>
-      <p>Tracker</p>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-item active" onclick="showPage('dashboard',this)">
-        <div class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
-        Dashboard
-      </div>
-      <div class="nav-item" onclick="showPage('log',this)">
-        <div class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-        Catat Aktivitas
-      </div>
-      <div class="nav-item" onclick="showPage('history',this)">
-        <div class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-        Riwayat
-      </div>
-      <div class="nav-item" onclick="showPage('bmi',this)">
-        <div class="nav-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-        Kalkulator BMI
-      </div>
-    </div>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar" id="sidebar-avatar">U</div>
-        <span id="sidebar-username">User</span>
-      </div>
-      <button class="btn-logout" onclick="doLogout()">Keluar</button>
-    </div>
-  </nav>
-  <div class="main">
-    <div class="topbar">
-      <div>
-        <div class="topbar-title" id="page-title">Dashboard</div>
-        <div class="topbar-sub" id="page-date"></div>
-      </div>
-      <button class="btn-add" onclick="openModal()">+ Tambah Aktivitas</button>
-    </div>
-    <div class="content">
-      <div class="page active" id="page-dashboard">
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-label">Total Aktivitas</div><div class="stat-value" id="stat-total">0</div><div class="stat-unit">sesi olahraga</div></div>
-          <div class="stat-card"><div class="stat-label">Total Durasi</div><div class="stat-value" id="stat-duration">0</div><div class="stat-unit">menit</div></div>
-          <div class="stat-card"><div class="stat-label">Aktivitas Hari Ini</div><div class="stat-value" id="stat-today">0</div><div class="stat-unit">sesi</div></div>
+      <div class="header-actions">
+        <div class="btn-icon-header" onclick="triggerNotificationSheet()" title="Notifikasi">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span class="notification-dot"></span>
         </div>
-        <div class="section-header"><span class="section-title">Olahraga Terbanyak</span></div>
-        <div id="sport-breakdown" style="margin-bottom:32px;"></div>
-        <hr class="divider"/>
-        <div class="section-header"><span class="section-title">Aktivitas Terbaru</span></div>
-        <div class="activity-list" id="recent-list"></div>
-      </div>
-      <div class="page" id="page-log">
-        <div style="max-width:520px;">
-          <div class="section-header" style="margin-bottom:24px;"><span class="section-title">Form Aktivitas</span></div>
-          <div id="inline-form-container"></div>
+
+        <div class="avatar-wrapper" onclick="showUserProfileModal()" title="Profil Tasya">
+          <img class="avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Tasya" onerror="this.src='https://ui-avatars.com/api/?name=Tasya&background=5844eb&color=fff&rounded=true'" />
+          <span class="online-indicator"></span>
         </div>
       </div>
-      <div class="page" id="page-history">
-        <div class="section-header">
-          <span class="section-title">Semua Riwayat</span>
-          <input class="search-bar" type="text" id="search-input" placeholder="Cari olahraga..." oninput="renderHistory()"/>
-        </div>
-        <div id="history-container"></div>
-      </div>
-      <div class="page" id="page-bmi">
-        <div class="bmi-grid">
-          <div>
-            <div class="section-header" style="margin-bottom:20px;"><span class="section-title">Hitung BMI</span></div>
-            <div class="form-group"><label class="form-label">Berat Badan (kg)</label><input class="form-input" type="number" id="bmi-weight" placeholder="Contoh: 65"/></div>
-            <div class="form-group"><label class="form-label">Tinggi Badan (cm)</label><input class="form-input" type="number" id="bmi-height" placeholder="Contoh: 170"/></div>
-            <button class="btn-primary-full" onclick="calcBMI()">Hitung BMI</button>
-            <div style="margin-top:24px; font-size:12px; color:var(--muted); line-height:1.6;">
-              Masukkan tinggi dan berat badan untuk melihat Indeks Massa Tubuh (IMT) serta estimasi selisih berat badan idealmu.
-            </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="screen-container">
+
+      <!-- ============================================== -->
+      <!-- SCREEN 1: BERANDA (HOME) [SCREENSHOT 3]       -->
+      <!-- ============================================== -->
+      <section id="screen-home" class="app-screen active">
+
+        <!-- GREETING ROW -->
+        <div class="home-greeting-row">
+          <div class="greeting-texts">
+            <h1>Halo, Tasya 👋</h1>
+            <p>Semangat untuk latihan hari ini!</p>
           </div>
-          <div id="bmi-result" class="bmi-result-card">
-            <div class="gauge-wrapper">
-              <div class="gauge"></div>
-              <div class="gauge-label gl-kurang">BB Kurang</div>
-              <div class="gauge-label gl-normal">Normal</div>
-              <div class="gauge-label gl-lebih">BB Berlebih</div>
-              <div class="gauge-center">
-                <div class="gauge-center-title">IMT</div>
-                <div class="gauge-value" id="bmi-number">-</div>
+        </div>
+
+        <!-- PURPLE HERO CARD -->
+        <div class="hero-purple-card">
+          <div class="hero-top-row">
+            <div>
+              <div class="hero-subhead">Aktivitas Fisik &amp; Kalori</div>
+              <div class="hero-main-title">Target Hari Ini</div>
+            </div>
+            <span class="hero-pill-badge" id="hero-target-pill">35% lagi!</span>
+          </div>
+
+          <!-- CIRCLE PROGRESS -->
+          <div class="hero-circle-center">
+            <div class="circle-progress-wrapper">
+              <svg viewBox="0 0 150 150">
+                <circle class="progress-bg-track" cx="75" cy="75" r="65" />
+                <circle id="hero-progress-ring" class="progress-bar-fill" cx="75" cy="75" r="65" />
+              </svg>
+              <div class="circle-center-text">
+                <div class="circle-val-num" id="hero-percentage-text">65%</div>
+                <div class="circle-val-caption" id="hero-duration-caption">Target 45/60 mnt</div>
               </div>
             </div>
-            
-            <div class="selisih-header"><span>Kategori</span><span>Selisih</span></div>
-            <div class="selisih-row">
-              <span id="bmi-category">-</span>
-              <span id="bmi-selisih">-</span>
+          </div>
+
+          <!-- INNER TRANSLUCENT BANNER -->
+          <div class="hero-inner-banner">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span id="hero-calorie-banner-text">250 kkal lagi untuk mencapai target harianmu!</span>
+          </div>
+        </div>
+
+        <!-- 2 METRICS CARDS -->
+        <div class="metrics-dual-grid">
+          <!-- Card 1: Total Durasi -->
+          <div class="metric-card">
+            <div class="metric-head">
+              <span class="metric-label">Total Durasi</span>
+              <div class="metric-icon-box cyan">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
             </div>
-            
-            <div class="bmi-full-table" id="bmi-full-table">
-              <!-- Will be generated by JS -->
+
+            <div class="metric-main-value" id="home-total-duration">
+              75 <span>menit</span>
+            </div>
+
+            <div class="metric-sparkline">
+              <svg viewBox="0 0 100 24" fill="none">
+                <path d="M0 18 Q 20 20, 35 14 T 70 12 T 95 4" stroke="#705bf6" stroke-width="3" stroke-linecap="round" fill="none" />
+                <circle cx="95" cy="4" r="3" fill="#705bf6" />
+              </svg>
+            </div>
+
+            <span class="metric-badge-pill lime">
+              ~ +15% vs kemarin
+            </span>
+          </div>
+
+          <!-- Card 2: Total Kalori -->
+          <div class="metric-card">
+            <div class="metric-head">
+              <span class="metric-label">Total Kalori</span>
+              <div class="metric-icon-box coral">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+                </svg>
+              </div>
+            </div>
+
+            <div class="metric-main-value" id="home-total-calories">
+              520 <span>kkal</span>
+            </div>
+
+            <div class="metric-bar-chart">
+              <div class="mini-bar" style="height: 35%;"></div>
+              <div class="mini-bar" style="height: 50%;"></div>
+              <div class="mini-bar" style="height: 42%;"></div>
+              <div class="mini-bar" style="height: 60%;"></div>
+              <div class="mini-bar highlight" style="height: 95%;"></div>
+              <div class="mini-bar" style="height: 70%;"></div>
+              <div class="mini-bar" style="height: 80%;"></div>
+            </div>
+
+            <span class="metric-badge-pill peach">
+              Optimal 🔥
+            </span>
+          </div>
+        </div>
+
+        <!-- STREAK BANNER CARD -->
+        <div class="streak-banner-card" onclick="showToast('Streak 5 hari aktif tercapai! Konsistensi luar biasa!')">
+          <div class="streak-icon-circle">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="7" />
+              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+            </svg>
+          </div>
+          <div class="streak-info">
+            <div class="streak-title">Streak 5 Hari Terus Aktif!</div>
+            <div class="streak-sub">Pertahankan konsistensi minggumu ✨</div>
+          </div>
+          <div class="streak-arrow">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- RIWAYAT AKTIVITAS SECTION -->
+        <div class="section-header-row">
+          <span class="section-main-heading">Riwayat Aktivitas</span>
+          <span class="section-link-action" onclick="openHistoryFullModal()">Lihat Semua</span>
+        </div>
+
+        <div class="activity-list-wrapper" id="home-recent-activity-list">
+          <!-- Populated by JavaScript with items matching exact screenshot -->
+        </div>
+
+        <!-- LIME ADD ACTIVITY BUTTON -->
+        <div class="home-action-btn-row">
+          <button class="btn-lime-full" onclick="navigateToScreen('screen-add')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            + Tambah Aktivitas
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 2: TAMBAH AKTIVITAS [SCREENSHOT 1]      -->
+      <!-- ============================================== -->
+      <section id="screen-add" class="app-screen">
+
+        <div class="screen-header-back">
+          <button class="btn-round-back" onclick="navigateToScreen('screen-home')" title="Kembali">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </button>
+          <div class="screen-title-area">
+            <h2>Tambah Aktivitas</h2>
+            <p>Catat latihan yang baru kamu selesaikan</p>
+          </div>
+        </div>
+
+        <!-- SECTION: PILIH JENIS OLAHRAGA -->
+        <div class="sport-grid-wrapper">
+          <div class="sport-grid-header">
+            <span class="sport-grid-title">Pilih Jenis Olahraga</span>
+            <span class="sport-grid-count">6 Pilihan</span>
+          </div>
+          <div class="sport-grid-sub">Pilih kategori latihan untuk estimasi akurat</div>
+
+          <div class="sport-cards-grid" id="sport-selector-container">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- SECTION: DURASI LATIHAN -->
+        <div class="add-act-card">
+          <div class="card-row-head">
+            <div class="card-head-left">
+              <div class="card-head-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <span class="card-title-text">Durasi Latihan</span>
+            </div>
+            <span class="card-target-badge">Target: 30–60m</span>
+          </div>
+
+          <!-- BIG STEPPER -->
+          <div class="big-stepper-row">
+            <button class="btn-step-square" onclick="adjustDuration(-5)">−</button>
+            <div class="stepper-middle-val">
+              <div class="stepper-big-digits">
+                <span id="duration-number-val" style="font-size: 40px; font-weight: 900; color: var(--text-dark);">45</span>
+                <span>menit</span>
+              </div>
+              <div class="stepper-sub-note">
+                <span class="green-dot-bullet"></span>
+                <span id="duration-status-note">Tempo Latihan Optimal</span>
+              </div>
+            </div>
+            <button class="btn-step-square" onclick="adjustDuration(5)">+</button>
+          </div>
+
+          <!-- QUICK PILLS -->
+          <div class="quick-pills-row">
+            <div class="pill-quick-opt" onclick="setQuickDuration(15)">15 mnt</div>
+            <div class="pill-quick-opt" onclick="setQuickDuration(30)">30 mnt</div>
+            <div class="pill-quick-opt active" onclick="setQuickDuration(45)">45 mnt</div>
+            <div class="pill-quick-opt" onclick="setQuickDuration(60)">60 mnt</div>
+          </div>
+        </div>
+
+        <!-- SECTION: ESTIMASI KALORI TERBAKAR -->
+        <div class="add-act-card">
+          <div class="card-row-head">
+            <div class="card-head-left">
+              <div class="card-head-icon peach">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+                </svg>
+              </div>
+              <span class="card-title-text">Estimasi Kalori Terbakar</span>
+            </div>
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #65a30d;"></span>
+          </div>
+
+          <div class="calorie-est-number">
+            <span id="calorie-display-val" style="font-size: 44px; font-weight: 900; color: var(--primary-purple);">360</span>
+            <span>kkal</span>
+          </div>
+
+          <p class="calorie-est-desc" id="calorie-detail-desc">
+            Dihitung otomatis berdasarkan intensitas Lari selama 45 menit.
+          </p>
+
+          <div class="calorie-tags-row">
+            <span class="calorie-tag-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+              Intensitas: Sedang-Tinggi
+            </span>
+            <span class="calorie-tag-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              Detak Jantung est.: 135 bpm
+            </span>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="add-activity-footer">
+          <button class="btn-save-activity" onclick="submitNewActivity()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Simpan Aktivitas
+          </button>
+          <button class="btn-cancel-flat" onclick="navigateToScreen('screen-home')">
+            Batal
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 3: KALKULATOR BMI [SCREENSHOT 2]        -->
+      <!-- ============================================== -->
+      <section id="screen-bmi" class="app-screen">
+
+        <div style="padding: 10px 24px 14px;">
+          <div class="bmi-sub-title-purple">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+            Kesehatan Personal
+          </div>
+          <h2 style="font-size: 21px; font-weight: 900; color: var(--text-dark);">Kalkulator BMI</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 3px; line-height: 1.45;">
+            Pantau indeks massa tubuh dan komposisi berat badan idealmu secara teratur.
+          </p>
+        </div>
+
+        <!-- BMI INPUT FORM CARD -->
+        <div class="add-act-card" style="margin-bottom: 18px;">
+          <span style="font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+            Jenis Kelamin
+          </span>
+
+          <div class="bmi-gender-toggle-grid">
+            <button class="btn-gender-pill active" id="gender-btn-w" onclick="setGender('f')">
+              ♀ Wanita
+            </button>
+            <button class="btn-gender-pill" id="gender-btn-m" onclick="setGender('m')">
+              ♂ Pria
+            </button>
+          </div>
+
+          <!-- Berat Badan -->
+          <div class="bmi-input-row">
+            <div class="bmi-input-label-row">
+              <span class="bmi-input-label-text">Berat Badan</span>
+              <span class="bmi-unit-pill">Satuan: kg</span>
+            </div>
+            <div class="bmi-stepper-control">
+              <button class="btn-step-square" style="width:38px; height:38px;" onclick="adjustBmiVal('weight', -1)">−</button>
+              <div class="bmi-stepper-value">
+                <span id="bmi-val-weight">54</span>
+                <span>kg</span>
+              </div>
+              <button class="btn-step-square" style="width:38px; height:38px;" onclick="adjustBmiVal('weight', 1)">+</button>
             </div>
           </div>
+
+          <!-- Tinggi Badan -->
+          <div class="bmi-input-row">
+            <div class="bmi-input-label-row">
+              <span class="bmi-input-label-text">Tinggi Badan</span>
+              <span class="bmi-unit-pill">Satuan: cm</span>
+            </div>
+            <div class="bmi-stepper-control">
+              <button class="btn-step-square" style="width:38px; height:38px;" onclick="adjustBmiVal('height', -1)">−</button>
+              <div class="bmi-stepper-value">
+                <span id="bmi-val-height">162</span>
+                <span>cm</span>
+              </div>
+              <button class="btn-step-square" style="width:38px; height:38px;" onclick="adjustBmiVal('height', 1)">+</button>
+            </div>
+          </div>
+
+          <!-- Usia -->
+          <div class="bmi-input-row" style="margin-bottom: 12px;">
+            <div class="bmi-input-label-row">
+              <span class="bmi-input-label-text">Usia</span>
+              <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Tahun</span>
+            </div>
+            <div class="bmi-stepper-control">
+              <button class="btn-step-square" style="width:38px; height:38px;" onclick="adjustBmiVal('age', -1)">−</button>
+              <div class="bmi-stepper-value">
+                <span id="bmi-val-age">24</span>
+                <span>th</span>
+              </div>
+              <button class="btn-step-square" style="width:38px; height:38px;" onclick="adjustBmiVal('age', 1)">+</button>
+            </div>
+          </div>
+
+          <button class="btn-calc-bmi" onclick="calculateBmi()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2" />
+              <line x1="8" y1="6" x2="16" y2="6" />
+              <line x1="16" y1="14" x2="16" y2="18" />
+              <path d="M16 10h.01" />
+              <path d="M12 10h.01" />
+              <path d="M8 10h.01" />
+              <path d="M12 14h.01" />
+              <path d="M8 14h.01" />
+              <path d="M12 18h.01" />
+              <path d="M8 18h.01" />
+            </svg>
+            Hitung BMI
+          </button>
+        </div>
+
+        <!-- BMI RESULT CARD -->
+        <div class="bmi-result-card">
+          <div class="analysis-head-row">
+            <div>
+              <div class="analysis-label">Hasil Analisis</div>
+              <div class="analysis-subhead">Skor BMI Kamu</div>
+            </div>
+            <span class="bmi-badge-normal" id="bmi-category-badge">
+              ✓ Normal (Ideal)
+            </span>
+          </div>
+
+          <div class="bmi-score-big-row">
+            <div class="bmi-score-val">
+              <span id="bmi-score-number" style="font-size: 32px; font-weight: 900; color: var(--text-dark);">20.6</span>
+              <span>kg/m²</span>
+            </div>
+            <span class="badge-kondisi-prima">
+              ❮ Kondisi Prima
+            </span>
+          </div>
+
+          <!-- GAUGE BAR -->
+          <div class="gauge-track-container">
+            <div class="gauge-multi-bar"></div>
+            <div class="gauge-indicator-pin" id="bmi-gauge-pin" style="left: 38%;">
+              <div class="gauge-pin-dot"></div>
+              <div class="gauge-pin-stem"></div>
+            </div>
+          </div>
+
+          <div class="gauge-labels-grid">
+            <div class="gauge-col">
+              <span class="gauge-col-title kurus">Kurus</span>
+              <span class="gauge-col-range">&lt; 18.5</span>
+            </div>
+            <div class="gauge-col">
+              <span class="gauge-col-title normal">Normal</span>
+              <span class="gauge-col-range">18.5 - 24.9</span>
+            </div>
+            <div class="gauge-col">
+              <span class="gauge-col-title lebih">Lebih</span>
+              <span class="gauge-col-range">25 - 29.9</span>
+            </div>
+            <div class="gauge-col">
+              <span class="gauge-col-title obesitas">Obesitas</span>
+              <span class="gauge-col-range">≥ 30.0</span>
+            </div>
+          </div>
+
+          <!-- IDEAL WEIGHT BOX -->
+          <div class="ideal-weight-box">
+            <div class="ideal-weight-left">
+              <div class="ideal-icon-circle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <span class="ideal-label-text">Rentang Berat Ideal</span>
+            </div>
+            <span class="ideal-range-text" id="bmi-ideal-range-text">48.6 kg – 65.3 kg</span>
+          </div>
+
+          <!-- ADVICE CALLOUT -->
+          <div class="advice-callout-card">
+            <div class="advice-bulb-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18h6" />
+                <path d="M10 22h4" />
+                <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+              </svg>
+            </div>
+            <div class="advice-content">
+              <h5>Saran Gaya Hidup Sehat</h5>
+              <p id="bmi-advice-text">
+                Bagus sekali! Berat badanmu dalam rentang ideal untuk tinggi badan 162 cm. Pertahankan rutinitas latihan 3–4× seminggu dan asupan gizi seimbang.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVE RECORD CARD -->
+        <div class="save-bmi-card">
+          <div class="save-bmi-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14" />
+              <line x1="4" y1="10" x2="4" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12" y2="3" />
+              <line x1="20" y1="21" x2="20" y2="16" />
+              <line x1="20" y1="12" x2="20" y2="3" />
+              <line x1="1" y1="14" x2="7" y2="14" />
+              <line x1="9" y1="8" x2="15" y2="8" />
+              <line x1="17" y1="16" x2="23" y2="16" />
+            </svg>
+          </div>
+          <div class="save-bmi-texts">
+            <h4>Simpan Catatan Hari Ini</h4>
+            <p>Lacak riwayat perubahan fisikmu</p>
+          </div>
+          <button class="btn-save-lime-sm" onclick="saveBmiRecord()">
+            Simpan
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 4: SESI LATIHAN AKTIF [SCREENSHOT 4]   -->
+      <!-- ============================================== -->
+      <section id="screen-recovery" class="app-screen">
+
+        <div class="screen-header-back" style="padding-bottom: 12px;">
+          <button class="btn-round-back" onclick="navigateToScreen('screen-home')" title="Kembali ke Beranda">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </button>
+          <div class="brand-group">
+            <div class="brand-logo-infinity">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18.178 8c5.096 0 5.096 8 0 8-2.68 0-4.7-2.68-6.178-5.32C10.522 8 8.5 5.32 5.822 5.32 1.726 5.32 1.726 13.32 5.822 13.32c2.68 0 4.7-2.68 6.178-5.32" />
+              </svg>
+            </div>
+            <div class="brand-texts">
+              <span class="brand-title" style="font-size: 14px;">Sesi Latihan Aktif</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONGRATS CELEBRATION CARD -->
+        <div class="congrats-banner-card">
+          <div class="sparkle-decor">✦</div>
+          <div class="congrats-badge-sub">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+            Selesai Berolahraga
+          </div>
+          <div class="congrats-title">Kerja Bagus, Tasya! 👏</div>
+          <div class="congrats-cal-pill" id="recovery-cal-badge">
+            🔥 360 kkal terbakar dalam 45 mnt!
+          </div>
+        </div>
+
+        <!-- REKOMENDASI MENU SECTION -->
+        <div class="food-section-container">
+          <div class="food-section-head">
+            <div class="food-head-title-row">
+              <span class="dot-purple-title"></span>
+              <span>Rekomendasi Menu: Pemulihan Optimal</span>
+            </div>
+            <p class="food-head-desc" id="recovery-food-intro">
+              Kombinasi tinggi protein untuk regenerasi otot dan karbohidrat kompleks untuk mengisi ulang energi tubuh setelah sesi lari.
+            </p>
+          </div>
+
+          <!-- TABS FILTER -->
+          <div class="food-filter-pills-row">
+            <button class="food-tab-pill active" id="food-tab-recovery" onclick="switchFoodTab('heavy')">
+              Pemulihan Berat
+            </button>
+            <button class="food-tab-pill" id="food-tab-hydration" onclick="switchFoodTab('snack')">
+              Hidrasi &amp; Camilan
+            </button>
+          </div>
+
+          <!-- FOOD CARDS DECK -->
+          <div id="food-cards-list">
+            <!-- Dynamically populated to match screenshot 4 exactly -->
+          </div>
+        </div>
+
+        <!-- FOOTER ACTIONS -->
+        <div class="food-screen-footer">
+          <button class="btn-purple-full" onclick="navigateToScreen('screen-home')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Kembali ke Beranda
+          </button>
+          <button class="btn-bookmark-link" onclick="saveAllMenuToFavorites()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            Simpan menu ke daftar favorit
+          </button>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ============================================== -->
+    <!-- BOTTOM FLOATING NAVIGATION BAR                 -->
+    <!-- ============================================== -->
+    <nav class="bottom-nav-dock">
+      <!-- Tab 1: Beranda -->
+      <button class="nav-tab-btn active" id="nav-btn-home" onclick="navigateToScreen('screen-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+        <span>Beranda</span>
+      </button>
+
+      <!-- Center FAB: Add Activity -->
+      <div class="nav-fab-center" onclick="navigateToScreen('screen-add')" title="Tambah Aktivitas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </div>
+
+      <!-- Tab 3: BMI -->
+      <button class="nav-tab-btn" id="nav-btn-bmi" onclick="navigateToScreen('screen-bmi')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="2" width="16" height="20" rx="2" />
+          <line x1="8" y1="6" x2="16" y2="6" />
+          <line x1="16" y1="14" x2="16" y2="18" />
+          <path d="M16 10h.01" />
+          <path d="M12 10h.01" />
+          <path d="M8 10h.01" />
+          <path d="M12 14h.01" />
+          <path d="M8 14h.01" />
+          <path d="M12 18h.01" />
+          <path d="M8 18h.01" />
+        </svg>
+        <span>BMI</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: DAFTAR LENGKAP RIWAYAT AKTIVITAS        -->
+  <!-- ============================================== -->
+  <div class="history-modal-overlay" id="history-modal-sheet" onclick="closeHistoryModalOutside(event)">
+    <div class="history-modal-sheet">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-header-title">
+        <h3>Riwayat Aktivitas Lengkap</h3>
+        <button class="btn-round-back" style="width:34px; height:34px;" onclick="closeHistoryFullModal()">
+          ✕
+        </button>
+      </div>
+
+      <div class="sheet-body-scroll">
+        <div class="history-filter-bar">
+          <input type="text" id="history-search-input" class="history-search-input" placeholder="Cari aktivitas..." oninput="renderFullHistoryList()" />
+          <select id="history-type-filter" class="history-select-dropdown" onchange="renderFullHistoryList()">
+            <option value="all">Semua</option>
+            <option value="Lari">Lari</option>
+            <option value="Bersepeda">Bersepeda</option>
+            <option value="Renang">Renang</option>
+            <option value="Yoga">Yoga</option>
+            <option value="Beban">Beban</option>
+            <option value="Jalan Kaki">Jalan Kaki</option>
+          </select>
+        </div>
+
+        <div id="modal-history-list-items" style="display:flex; flex-direction:column; gap:10px;">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="margin-top: 20px; display:flex; gap:10px;">
+          <button class="btn-save-lime-sm" style="flex:1; padding:12px;" onclick="loadDemoSampleHistory()">
+            Muat Contoh Riwayat
+          </button>
+          <button class="btn-cancel-flat" style="padding:12px; font-size:12px;" onclick="resetAllHistoryData()">
+            Reset Data
+          </button>
         </div>
       </div>
     </div>
   </div>
-</div>
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Tambah Aktivitas</div>
-      <button class="btn-close" onclick="closeModal()">x</button>
-    </div>
-    <div class="form-group"><label class="form-label">Pilih Jenis Olahraga</label><div class="sport-chips" id="sport-chips-modal"></div></div>
-    <div class="form-group"><label class="form-label">Durasi (menit)</label><input class="form-input" type="number" id="modal-duration" placeholder="Contoh: 30" min="1"/></div>
-    <div class="form-group"><label class="form-label">Tanggal</label><input class="form-input" type="date" id="modal-date"/></div>
-    <div class="form-group"><label class="form-label">Catatan (opsional)</label><textarea class="form-textarea" id="modal-note" placeholder="Tuliskan catatan aktivitasmu..."></textarea></div>
-    <div class="form-footer">
-      <button class="btn-secondary" onclick="closeModal()">Batal</button>
-      <button class="btn-primary" onclick="saveActivity()">Simpan</button>
-    </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast-pill-notification" id="app-toast">
+    <svg class="toast-icon-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+    <span id="app-toast-text">Pesan berhasil disimpan!</span>
   </div>
-</div>
-<div class="notif" id="notif"></div>
-<script>
-  // ─── LOGIN & LOGOUT ───────────────────────────────────────────────
-  function checkAuth() {
-    const user = localStorage.getItem('ft_user');
-    if (!user) {
-      document.getElementById('login-screen').style.display = 'flex';
-      document.querySelector('.app').style.display = 'none';
-    } else {
-      document.getElementById('login-screen').style.display = 'none';
-      document.querySelector('.app').style.display = 'flex';
-      
-      document.getElementById('sidebar-username').textContent = user;
-      document.getElementById('sidebar-avatar').textContent = user.charAt(0).toUpperCase();
-      
-      // Muat data khusus user ini (disimpan dengan prefix user)
-      const userData = localStorage.getItem('ft_activities_' + user);
-      activities = JSON.parse(userData || '[]');
-      render();
-    }
-  }
 
-  function doLogin() {
-    const u = document.getElementById('login-user').value.trim();
-    const p = document.getElementById('login-pass').value.trim();
-    if (!u) { alert('Nama pengguna tidak boleh kosong!'); return; }
-    if (!p) { alert('Kata sandi tidak boleh kosong!'); return; }
-    
-    localStorage.setItem('ft_user', u);
-    document.getElementById('login-user').value = '';
-    document.getElementById('login-pass').value = '';
-    
-    notify('Berhasil masuk sebagai ' + u);
-    checkAuth();
-  }
-
-  function doLogout() {
-    localStorage.removeItem('ft_user');
-    checkAuth();
-  }
-
-  // ─── DATA & INIT ──────────────────────────────────────────────────
-  const SPORTS = ['Lari','Jalan Kaki','Bersepeda','Renang','Jogging','Senam','Yoga','Badminton','Sepak Bola','Basket','Workout','Hiking','Bela Diri','Tenis','Voli','Lainnya'];
-  let activities = [];
-  let selectedSport = null;
-
-  function init() {
-    const d = new Date();
-    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    document.getElementById('page-date').textContent = days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-    document.getElementById('modal-date').value = d.toISOString().split('T')[0];
-    
-    buildModalChips();
-    buildInlineForm();
-    checkAuth();
-    
-    // Allow Enter key to login
-    document.getElementById('login-pass').addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') doLogin();
-    });
-  }
-
-  function buildModalChips() {
-    const c = document.getElementById('sport-chips-modal');
-    c.innerHTML = '';
-    SPORTS.forEach(function(s) {
-      const chip = document.createElement('div');
-      chip.className = 'sport-chip';
-      chip.textContent = s;
-      chip.onclick = function() {
-        c.querySelectorAll('.sport-chip').forEach(function(x) { x.classList.remove('selected'); });
-        chip.classList.add('selected');
-        selectedSport = s;
-      };
-      c.appendChild(chip);
-    });
-  }
-
-  function buildInlineForm() {
-    const container = document.getElementById('inline-form-container');
-    let inlineSport = null;
-    const today = new Date().toISOString().split('T')[0];
-    container.innerHTML =
-      '<div class="form-group"><label class="form-label">Pilih Jenis Olahraga</label><div class="sport-chips" id="sc-inline"></div></div>' +
-      '<div class="form-group"><label class="form-label">Durasi (menit)</label><input class="form-input" type="number" id="il-dur" placeholder="Contoh: 30" min="1"/></div>' +
-      '<div class="form-group"><label class="form-label">Tanggal</label><input class="form-input" type="date" id="il-date" value="' + today + '"/></div>' +
-      '<div class="form-group"><label class="form-label">Catatan (opsional)</label><textarea class="form-textarea" id="il-note" placeholder="Tuliskan catatan aktivitasmu..."></textarea></div>' +
-      '<button class="btn-primary-full" onclick="saveInline()">Simpan Aktivitas</button>';
-    
-    const cc = document.getElementById('sc-inline');
-    SPORTS.forEach(function(s) {
-      const chip = document.createElement('div');
-      chip.className = 'sport-chip';
-      chip.textContent = s;
-      chip.onclick = function() {
-        cc.querySelectorAll('.sport-chip').forEach(function(x) { x.classList.remove('selected'); });
-        chip.classList.add('selected');
-        inlineSport = s;
-      };
-      cc.appendChild(chip);
-    });
-    
-    window._getInlineSport = function() { return inlineSport; };
-    window._resetInline = function() {
-      inlineSport = null;
-      cc.querySelectorAll('.sport-chip').forEach(function(x) { x.classList.remove('selected'); });
-      document.getElementById('il-dur').value = '';
-      document.getElementById('il-note').value = '';
-      document.getElementById('il-date').value = new Date().toISOString().split('T')[0];
-    };
-  }
-
-  function saveInline() {
-    const sport = window._getInlineSport();
-    const dur = document.getElementById('il-dur').value;
-    const date = document.getElementById('il-date').value;
-    const note = document.getElementById('il-note').value;
-    if (!sport) { notify('Pilih jenis olahraga terlebih dahulu'); return; }
-    if (!dur || parseInt(dur) <= 0) { notify('Masukkan durasi yang valid'); return; }
-    if (!date) { notify('Pilih tanggal'); return; }
-    
-    activities.unshift({ id: Date.now().toString(), name: sport, duration: parseInt(dur), date: date, note: note.trim() });
-    save(); render(); window._resetInline();
-    notify('Aktivitas berhasil disimpan');
-  }
-
-  function openModal() {
-    selectedSport = null;
-    document.querySelectorAll('#sport-chips-modal .sport-chip').forEach(function(c) { c.classList.remove('selected'); });
-    document.getElementById('modal-duration').value = '';
-    document.getElementById('modal-note').value = '';
-    document.getElementById('modal-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('modal-overlay').classList.add('open');
-  }
-
-  function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-
-  document.getElementById('modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-
-  function saveActivity() {
-    const dur = document.getElementById('modal-duration').value;
-    const date = document.getElementById('modal-date').value;
-    const note = document.getElementById('modal-note').value;
-    if (!selectedSport) { notify('Pilih jenis olahraga terlebih dahulu'); return; }
-    if (!dur || parseInt(dur) <= 0) { notify('Masukkan durasi yang valid'); return; }
-    if (!date) { notify('Pilih tanggal'); return; }
-    
-    activities.unshift({ id: Date.now().toString(), name: selectedSport, duration: parseInt(dur), date: date, note: note.trim() });
-    save(); render(); closeModal();
-    notify('Aktivitas berhasil disimpan');
-  }
-
-  function deleteActivity(id) {
-    if (!confirm('Hapus aktivitas ini?')) return;
-    activities = activities.filter(function(a) { return a.id !== id; });
-    save(); render(); notify('Aktivitas dihapus');
-  }
-
-  function save() {
-    const user = localStorage.getItem('ft_user');
-    if (user) {
-      localStorage.setItem('ft_activities_' + user, JSON.stringify(activities));
-    }
-  }
-
-  function render() { renderStats(); renderBreakdown(); renderRecent(); renderHistory(); }
-
-  function renderStats() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('stat-total').textContent = activities.length;
-    document.getElementById('stat-duration').textContent = activities.reduce(function(s,a) { return s+a.duration; }, 0);
-    document.getElementById('stat-today').textContent = activities.filter(function(a) { return a.date === today; }).length;
-  }
-
-  function renderBreakdown() {
-    const c = document.getElementById('sport-breakdown');
-    if (!activities.length) { c.innerHTML = '<p style="font-size:13px;color:var(--muted);">Belum ada data aktivitas.</p>'; return; }
-    const counts = {};
-    activities.forEach(function(a) { counts[a.name] = (counts[a.name]||0)+1; });
-    const sorted = Object.entries(counts).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
-    const max = sorted[0][1];
-    c.innerHTML = sorted.map(function(e) {
-      return '<div class="progress-item"><div class="progress-header"><span class="progress-label">'+e[0]+'</span><span class="progress-value">'+e[1]+' sesi</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+Math.round(e[1]/max*100)+'%"></div></div></div>';
-    }).join('');
-  }
-
-  function fmtDate(ds) {
-    const d = new Date(ds + 'T00:00:00');
-    const m = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
-    return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
-  }
-
-  function renderRecent() {
-    const c = document.getElementById('recent-list');
-    if (!activities.length) {
-      c.innerHTML = '<div class="empty-state"><div class="empty-icon">+</div><h3>Belum ada aktivitas</h3><p>Klik "Tambah Aktivitas" untuk mulai mencatat</p></div>';
-      return;
-    }
-    c.innerHTML = activities.slice(0,5).map(function(a) {
-      return '<div class="activity-card"><div class="activity-icon">'+a.name[0]+'</div><div class="activity-info"><div class="activity-name">'+a.name+'</div><div class="activity-date">'+fmtDate(a.date)+'</div>'+(a.note?'<div class="activity-note">'+a.note+'</div>':'')+'</div><div class="activity-duration">'+a.duration+' <span class="activity-dur-unit">menit</span></div><button class="btn-delete" onclick="deleteActivity(\''+a.id+'\')">Hapus</button></div>';
-    }).join('');
-  }
-
-  function renderHistory() {
-    const c = document.getElementById('history-container');
-    const q = ((document.getElementById('search-input')||{}).value||'').toLowerCase();
-    const filtered = activities.filter(function(a) { return a.name.toLowerCase().indexOf(q) >= 0; });
-    if (!filtered.length) {
-      c.innerHTML = '<div class="empty-state"><div class="empty-icon">?</div><h3>'+(activities.length?'Tidak ditemukan':'Belum ada riwayat')+'</h3><p>'+(activities.length?'Coba kata kunci lain':'Mulai catat aktivitas olahraga kamu')+'</p></div>';
-      return;
-    }
-    c.innerHTML = '<div class="history-table"><div class="table-head"><div class="th">Olahraga</div><div class="th">Durasi</div><div class="th">Tanggal</div><div class="th">Catatan</div><div class="th"></div></div>'+
-      filtered.map(function(a) {
-        return '<div class="table-row"><div class="td td-name">'+a.name+'</div><div class="td">'+a.duration+' menit</div><div class="td td-muted">'+fmtDate(a.date)+'</div><div class="td td-muted" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:160px;">'+( a.note||'-')+'</div><div class="td" style="text-align:right;"><button class="btn-delete" onclick="deleteActivity(\''+a.id+'\')">Hapus</button></div></div>';
-      }).join('')+'</div>';
-  }
-
-  function showPage(page, el) {
-    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
-    document.getElementById('page-'+page).classList.add('active');
-    el.classList.add('active');
-    var titles = {dashboard:'Dashboard',log:'Catat Aktivitas',history:'Riwayat Aktivitas',bmi:'Kalkulator BMI'};
-    document.getElementById('page-title').textContent = titles[page];
-  }
-
-  function calcBMI() {
-    const w = parseFloat(document.getElementById('bmi-weight').value);
-    const h = parseFloat(document.getElementById('bmi-height').value);
-    if (!w||!h||w<=0||h<=0) { notify('Isi berat dan tinggi badan dengan benar'); return; }
-    
-    const hm = h / 100;
-    const bmi = w / (hm * hm);
-    
-    const minNormal = 18.5 * hm * hm;
-    const maxNormal = 24.9 * hm * hm;
-    
-    let selisihText = '-';
-    let cat = '';
-    let colorClass = '';
-    let colorHex = '';
-    
-    if (bmi < 15) { cat = 'Bobot Terlalu Rendah'; colorClass = 'active'; colorHex = '#0ea5e9'; }
-    else if (bmi < 17) { cat = 'Sangat Kurang Bobot'; colorClass = 'active'; colorHex = '#0ea5e9'; }
-    else if (bmi < 18.5) { cat = 'Kurang Bobot'; colorClass = 'active'; colorHex = '#0ea5e9'; }
-    else if (bmi < 25) { cat = 'Normal'; colorClass = 'active-normal'; colorHex = '#22c55e'; }
-    else if (bmi < 30) { cat = 'Kelebihan Bobot'; colorClass = 'active-over'; colorHex = '#ef4444'; }
-    else if (bmi < 35) { cat = 'Obesitas Kelas I'; colorClass = 'active-over'; colorHex = '#ef4444'; }
-    else if (bmi < 40) { cat = 'Obesitas Kelas II'; colorClass = 'active-over'; colorHex = '#ef4444'; }
-    else { cat = 'Obesitas Kelas III'; colorClass = 'active-over'; colorHex = '#ef4444'; }
-
-    if (bmi < 18.5) {
-      selisihText = '+' + (minNormal - w).toFixed(1) + ' kg';
-    } else if (bmi >= 25) {
-      selisihText = '-' + (w - maxNormal).toFixed(1) + ' kg';
-    } else {
-      selisihText = '0 kg';
-    }
-
-    document.getElementById('bmi-number').textContent = bmi.toFixed(1);
-    document.getElementById('bmi-number').style.color = colorHex;
-    document.getElementById('bmi-category').textContent = cat;
-    document.getElementById('bmi-category').style.color = colorHex;
-    document.getElementById('bmi-selisih').textContent = selisihText;
-    document.getElementById('bmi-selisih').style.color = colorHex;
-    
-    const tableData = [
-      { l: 'Bobot Terlalu Rendah', r: '< 15.0', match: bmi < 15 },
-      { l: 'Sangat Kurang Bobot', r: '15.0 - 16.9', match: bmi >= 15 && bmi < 17 },
-      { l: 'Kurang Bobot', r: '17.0 - 18.4', match: bmi >= 17 && bmi < 18.5 },
-      { l: 'Normal', r: '18.5 - 24.9', match: bmi >= 18.5 && bmi < 25 },
-      { l: 'Kelebihan Bobot', r: '25.0 - 29.9', match: bmi >= 25 && bmi < 30 },
-      { l: 'Obesitas Kelas I', r: '30.0 - 34.9', match: bmi >= 30 && bmi < 35 },
-      { l: 'Obesitas Kelas II', r: '35.0 - 39.9', match: bmi >= 35 && bmi < 40 },
-      { l: 'Obesitas Kelas III', r: '≥ 40.0', match: bmi >= 40 }
+  <!-- APPLICATION LOGIC & STATE -->
+  <script>
+    /* ========================================================
+     * DATA MODEL & CONSTANTS
+     * ======================================================== */
+    const SPORTS_DATA = [
+      {
+        id: 'lari',
+        name: 'Lari',
+        rate: 8.0,
+        rateLabel: '~8 kkal/m',
+        color: 'green',
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M10 22v-5l-2-2 3-4 3 2v4"/><path d="m7 12 4-2 3 3 4-2"/></svg>`
+      },
+      {
+        id: 'bersepeda',
+        name: 'Bersepeda',
+        rate: 6.5,
+        rateLabel: '~6.5 kkal/m',
+        color: 'cyan',
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5L9 9l4.5-2L15 11l3.5 6.5"/><path d="M5.5 17.5 9 9"/></svg>`
+      },
+      {
+        id: 'renang',
+        name: 'Renang',
+        rate: 9.0,
+        rateLabel: '~9 kkal/m',
+        color: 'cyan',
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18c1.5 0 2.5-.5 3.5-1s2-.5 3.5-.5 2.5.5 3.5 1 2 .5 3.5.5 2.5-.5 3.5-1 2-.5 3.5-.5"/><path d="M2 22c1.5 0 2.5-.5 3.5-1s2-.5 3.5-.5 2.5.5 3.5 1 2 .5 3.5.5 2.5-.5 3.5-1 2-.5 3.5-.5"/><circle cx="16" cy="7" r="2"/><path d="M9 13l3-4 4 2 3-2"/></svg>`
+      },
+      {
+        id: 'yoga',
+        name: 'Yoga',
+        rate: 4.0,
+        rateLabel: '~4 kkal/m',
+        color: 'pink',
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M4 17l4-2 4 4 4-4 4 2"/><path d="M12 9v6"/></svg>`
+      },
+      {
+        id: 'beban',
+        name: 'Beban',
+        rate: 5.5,
+        rateLabel: '~5.5 kkal/m',
+        color: 'green',
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M4 9v6M20 9v6M9 4v16M15 4v16"/></svg>`
+      },
+      {
+        id: 'jalan',
+        name: 'Jalan Kaki',
+        rate: 3.8,
+        rateLabel: '~3.8 kkal/m',
+        color: 'cyan',
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="m9 20 3-6-3-4 4-2 3 4-2 8"/><path d="M6 17l3-3"/></svg>`
+      }
     ];
-    
-    let html = '';
-    tableData.forEach(function(row) {
-      let cls = 'bmi-ft-row';
-      if (row.match) cls += ' ' + colorClass;
-      html += '<div class="'+cls+'"><span>'+(row.match ? '▶ ' : '')+row.l+'</span><span>'+row.r+'</span></div>';
-    });
-    
-    html += '<div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border); display:flex; justify-content:space-between; font-weight:700; color:var(--pure);"><span>Bobot Normal</span><span>'+minNormal.toFixed(1)+' - '+maxNormal.toFixed(1)+' kg</span></div>';
-    
-    document.getElementById('bmi-full-table').innerHTML = html;
-    document.getElementById('bmi-result').classList.add('show');
-  }
 
-  function notify(msg) {
-    const el = document.getElementById('notif');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(function() { el.classList.remove('show'); }, 2800);
-  }
+    const FOOD_DATA = [
+      {
+        id: 'f1',
+        name: 'Dada Ayam Panggang & Nasi Merah',
+        category: 'MAKANAN UTAMA • Pemulihan Otot',
+        tab: 'heavy',
+        protein: '32g Protein',
+        calories: '420 kkal',
+        desc: 'Sumber protein tanpa lemak dipadukan karbohidrat kompleks untuk mengisi ulang energi tubuh.',
+        image: 'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80',
+        favorite: true
+      },
+      {
+        id: 'f2',
+        name: 'Telur Rebus (2 butir) & Roti Gandum',
+        category: 'CAMILAN SEHAT • Cepat Disajikan',
+        tab: 'heavy',
+        protein: '14g Protein',
+        calories: '210 kkal',
+        desc: 'Praktis, kaya asam amino esensial dan serat untuk menjaga rasa kenyang dan pemulihan cepat.',
+        image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=300&q=80',
+        favorite: false
+      },
+      {
+        id: 'f3',
+        name: 'Pisang Cavendish & Selai Kacang',
+        category: 'ENERGI CEPAT • Anti Kram',
+        tab: 'snack',
+        protein: '6g Protein',
+        calories: '190 kkal',
+        desc: 'Mengembalikan glikogen dan mencegah kram otot berkat kandungan kalium dan magnesium alami.',
+        image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=300&q=80',
+        favorite: true
+      },
+      {
+        id: 'f4',
+        name: 'Air Kelapa & Greek Yogurt Smoothie',
+        category: 'HIDRASI ELEKTROLIT • Segar Alami',
+        tab: 'snack',
+        protein: '15g Protein',
+        calories: '180 kkal',
+        desc: 'Elektrolit alami untuk rehidrasi sel tubuh seketika dan probiotik untuk imunitas optimal.',
+        image: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=300&q=80',
+        favorite: false
+      }
+    ];
 
-  window.onload = init;
-</script>
+    /* Sample initial activity history matching Screenshot 3 */
+    const DEFAULT_ACTIVITIES = [
+      {
+        id: 'act_1',
+        name: 'Lari Pagi',
+        sportId: 'lari',
+        duration: 35,
+        calories: 280,
+        dateFormatted: 'Hari ini, 06:30 WIB',
+        timestamp: Date.now() - 3600000 * 4
+      },
+      {
+        id: 'act_2',
+        name: 'Bersepeda Sore',
+        sportId: 'bersepeda',
+        duration: 25,
+        calories: 160,
+        dateFormatted: 'Kemarin, 17:15 WIB',
+        timestamp: Date.now() - 3600000 * 24
+      },
+      {
+        id: 'act_3',
+        name: 'Yoga & Peregangan',
+        sportId: 'yoga',
+        duration: 15,
+        calories: 80,
+        dateFormatted: 'Kemarin, 07:00 WIB',
+        timestamp: Date.now() - 3600000 * 34
+      }
+    ];
+
+    /* APP STATE */
+    let currentScreen = 'screen-home';
+    let selectedSportId = 'lari';
+    let currentDuration = 45;
+    let selectedFoodTab = 'heavy';
+
+    // BMI State
+    let bmiGender = 'f';
+    let bmiWeight = 54;
+    let bmiHeight = 162;
+    let bmiAge = 24;
+
+    // Local Storage Data
+    let activities = [];
+    let savedBmiLogs = [];
+
+    /* ========================================================
+     * INITIALIZATION
+     * ======================================================== */
+    function initApp() {
+      loadStorageData();
+      renderSportSelectorGrid();
+      updateCalorieEstimation();
+      renderHomeScreenData();
+      renderFoodCardsDeck();
+      calculateBmi();
+    }
+
+    function loadStorageData() {
+      try {
+        const storedActs = localStorage.getItem('fittrack_activities_v2');
+        if (storedActs) {
+          activities = JSON.parse(storedActs);
+        } else {
+          activities = [...DEFAULT_ACTIVITIES];
+          saveActivitiesToStorage();
+        }
+
+        const storedBmi = localStorage.getItem('fittrack_bmi_logs');
+        if (storedBmi) {
+          savedBmiLogs = JSON.parse(storedBmi);
+        }
+      } catch (e) {
+        activities = [...DEFAULT_ACTIVITIES];
+      }
+    }
+
+    function saveActivitiesToStorage() {
+      try {
+        localStorage.setItem('fittrack_activities_v2', JSON.stringify(activities));
+      } catch (e) {}
+    }
+
+    /* ========================================================
+     * NAVIGATION BETWEEN SCREENS
+     * ======================================================== */
+    function navigateToScreen(screenId) {
+      document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) {
+        target.classList.add('active');
+        currentScreen = screenId;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Update Top Header Page Label
+      const labelEl = document.getElementById('header-page-title');
+      if (screenId === 'screen-home') labelEl.textContent = 'Beranda';
+      else if (screenId === 'screen-add') labelEl.textContent = 'Tambah';
+      else if (screenId === 'screen-bmi') labelEl.textContent = 'Bmi';
+      else if (screenId === 'screen-recovery') labelEl.textContent = 'Sesi Latihan Aktif';
+
+      // Update Bottom Nav Active Tabs
+      document.getElementById('nav-btn-home').classList.toggle('active', screenId === 'screen-home');
+      document.getElementById('nav-btn-bmi').classList.toggle('active', screenId === 'screen-bmi');
+    }
+
+    /* ========================================================
+     * SCREEN 1: BERANDA (HOME DASHBOARD) LOGIC
+     * ======================================================== */
+    function renderHomeScreenData() {
+      // Calculate totals
+      const totalDur = activities.reduce((sum, a) => sum + (Number(a.duration) || 0), 0);
+      const totalCal = activities.reduce((sum, a) => sum + (Number(a.calories) || 0), 0);
+
+      document.getElementById('home-total-duration').innerHTML = `${totalDur} <span>menit</span>`;
+      document.getElementById('home-total-calories').innerHTML = `${totalCal} <span>kkal</span>`;
+
+      // Circular Target Progress (Goal: 60 mins/day)
+      const targetMins = 60;
+      const progressPercent = Math.min(100, Math.round((Math.min(totalDur, 60) / targetMins) * 100)) || 65;
+      const remainingPercent = 100 - progressPercent;
+
+      const ring = document.getElementById('hero-progress-ring');
+      if (ring) {
+        // Circumference for r=65 is ~408.4
+        const offset = 408 - (408 * progressPercent) / 100;
+        ring.style.strokeDashoffset = offset;
+      }
+
+      document.getElementById('hero-percentage-text').textContent = `${progressPercent}%`;
+      document.getElementById('hero-duration-caption').textContent = `Target ${Math.min(totalDur, 60)}/${targetMins} mnt`;
+      document.getElementById('hero-target-pill').textContent = remainingPercent > 0 ? `${remainingPercent}% lagi!` : 'Target Tercapai! 🎉';
+
+      // Calorie deficit banner
+      const calorieDeficit = Math.max(0, 500 - totalCal);
+      if (calorieDeficit > 0) {
+        document.getElementById('hero-calorie-banner-text').textContent = `${calorieDeficit} kkal lagi untuk mencapai target harianmu!`;
+      } else {
+        document.getElementById('hero-calorie-banner-text').textContent = `Hebat! Target kalori harianmu telah terlampaui! 🔥`;
+      }
+
+      // Render Recent 3 Activities on Home
+      const listContainer = document.getElementById('home-recent-activity-list');
+      const recent = activities.slice(0, 3);
+
+      if (recent.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align:center; padding: 24px; color: var(--text-secondary); font-size:13px;">
+            Belum ada aktivitas hari ini. Mulai catat sekarang!
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = recent.map(act => {
+        const sport = SPORTS_DATA.find(s => s.id === act.sportId) || SPORTS_DATA[0];
+        let colorClass = sport.color || 'green';
+
+        return `
+          <div class="activity-item-card" onclick="openActivityDetailModal('${act.id}')">
+            <div class="activity-icon-sq ${colorClass}">
+              ${sport.iconSvg}
+            </div>
+            <div class="activity-details">
+              <div class="activity-name-row">${act.name}</div>
+              <div class="activity-meta-row">${act.duration} menit • ${act.calories} kkal</div>
+              <div class="activity-time-stamp">${act.dateFormatted || 'Hari ini'}</div>
+            </div>
+            <div class="activity-arrow-chevron">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ========================================================
+     * SCREEN 2: TAMBAH AKTIVITAS (ADD ACTIVITY) LOGIC
+     * ======================================================== */
+    function renderSportSelectorGrid() {
+      const container = document.getElementById('sport-selector-container');
+      container.innerHTML = SPORTS_DATA.map(s => {
+        const isSelected = s.id === selectedSportId;
+        return `
+          <div class="sport-select-card ${isSelected ? 'selected' : ''}" onclick="selectSport('${s.id}')">
+            <div class="sport-card-check">✓</div>
+            <div class="sport-icon-circle">
+              ${s.iconSvg}
+            </div>
+            <div class="sport-card-name">${s.name}</div>
+            <div class="sport-card-rate">${s.rateLabel}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectSport(sportId) {
+      selectedSportId = sportId;
+      renderSportSelectorGrid();
+      updateCalorieEstimation();
+    }
+
+    function adjustDuration(delta) {
+      currentDuration += delta;
+      if (currentDuration < 5) currentDuration = 5;
+      if (currentDuration > 240) currentDuration = 240;
+      syncDurationView();
+    }
+
+    function setQuickDuration(mins) {
+      currentDuration = mins;
+      syncDurationView();
+    }
+
+    function syncDurationView() {
+      document.getElementById('duration-number-val').textContent = currentDuration;
+
+      // Update active state on quick pills
+      document.querySelectorAll('.pill-quick-opt').forEach(pill => {
+        const val = parseInt(pill.textContent);
+        pill.classList.toggle('active', val === currentDuration);
+      });
+
+      // Update status note under duration
+      const noteEl = document.getElementById('duration-status-note');
+      if (currentDuration >= 30 && currentDuration <= 60) {
+        noteEl.textContent = 'Tempo Latihan Optimal';
+      } else if (currentDuration < 30) {
+        noteEl.textContent = 'Pemanasan / Sesi Ringan';
+      } else {
+        noteEl.textContent = 'Ketahanan & Intensitas Tinggi';
+      }
+
+      updateCalorieEstimation();
+    }
+
+    function updateCalorieEstimation() {
+      const sport = SPORTS_DATA.find(s => s.id === selectedSportId) || SPORTS_DATA[0];
+      const cal = Math.round(sport.rate * currentDuration);
+
+      document.getElementById('calorie-display-val').textContent = cal;
+      document.getElementById('calorie-detail-desc').textContent =
+        `Dihitung otomatis berdasarkan intensitas ${sport.name} selama ${currentDuration} menit.`;
+    }
+
+    function submitNewActivity() {
+      const sport = SPORTS_DATA.find(s => s.id === selectedSportId) || SPORTS_DATA[0];
+      const cal = Math.round(sport.rate * currentDuration);
+
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+
+      const newAct = {
+        id: 'act_' + Date.now(),
+        name: sport.name + ' Sesi',
+        sportId: sport.id,
+        duration: currentDuration,
+        calories: cal,
+        dateFormatted: `Hari ini, ${hours}:${mins} WIB`,
+        timestamp: Date.now()
+      };
+
+      activities.unshift(newAct);
+      saveActivitiesToStorage();
+      renderHomeScreenData();
+
+      // Update Screen 4 Celebration Card with the latest workout stats!
+      document.getElementById('recovery-cal-badge').textContent = `🔥 ${cal} kkal terbakar dalam ${currentDuration} mnt!`;
+      document.getElementById('recovery-food-intro').textContent =
+        `Kombinasi tinggi protein untuk regenerasi otot dan karbohidrat kompleks untuk mengisi ulang energi tubuh setelah sesi ${sport.name.toLowerCase()}.`;
+
+      showToast(`Aktivitas ${sport.name} (${cal} kkal) berhasil disimpan!`);
+
+      // Automatically transition to Post-Workout Recovery (Screenshot 4)
+      setTimeout(() => {
+        navigateToScreen('screen-recovery');
+      }, 400);
+    }
+
+    /* ========================================================
+     * SCREEN 3: BMI CALCULATOR LOGIC
+     * ======================================================== */
+    function setGender(g) {
+      bmiGender = g;
+      document.getElementById('gender-btn-w').classList.toggle('active', g === 'f');
+      document.getElementById('gender-btn-m').classList.toggle('active', g === 'm');
+      calculateBmi();
+    }
+
+    function adjustBmiVal(field, delta) {
+      if (field === 'weight') {
+        bmiWeight += delta;
+        if (bmiWeight < 20) bmiWeight = 20;
+        if (bmiWeight > 220) bmiWeight = 220;
+        document.getElementById('bmi-val-weight').textContent = bmiWeight;
+      } else if (field === 'height') {
+        bmiHeight += delta;
+        if (bmiHeight < 80) bmiHeight = 80;
+        if (bmiHeight > 240) bmiHeight = 240;
+        document.getElementById('bmi-val-height').textContent = bmiHeight;
+      } else if (field === 'age') {
+        bmiAge += delta;
+        if (bmiAge < 10) bmiAge = 10;
+        if (bmiAge > 100) bmiAge = 100;
+        document.getElementById('bmi-val-age').textContent = bmiAge;
+      }
+      calculateBmi();
+    }
+
+    function calculateBmi() {
+      const hM = bmiHeight / 100;
+      const bmi = bmiWeight / (hM * hM);
+      const formatted = bmi.toFixed(1);
+
+      document.getElementById('bmi-score-number').textContent = formatted;
+
+      // Ideal range: 18.5 to 24.9
+      const minIdeal = (18.5 * hM * hM).toFixed(1);
+      const maxIdeal = (24.9 * hM * hM).toFixed(1);
+      document.getElementById('bmi-ideal-range-text').textContent = `${minIdeal} kg – ${maxIdeal} kg`;
+
+      const badgeEl = document.getElementById('bmi-category-badge');
+      const adviceEl = document.getElementById('bmi-advice-text');
+      const pinEl = document.getElementById('bmi-gauge-pin');
+
+      // Calculate pin position percentage across scale 14 to 35
+      let pinPercent = ((bmi - 14) / (34 - 14)) * 100;
+      pinPercent = Math.max(5, Math.min(95, pinPercent));
+      pinEl.style.left = `${pinPercent}%`;
+
+      if (bmi < 18.5) {
+        badgeEl.textContent = 'Kurus (Perlu Tambah)';
+        badgeEl.style.background = '#e2f8fb';
+        badgeEl.style.color = '#0284c7';
+        adviceEl.textContent = `Berat badanmu berada di bawah batas normal untuk tinggi ${bmiHeight} cm. Tingkatkan asupan kalori bernutrisi dan lakukan latihan beban untuk membangun massa otot.`;
+      } else if (bmi <= 24.9) {
+        badgeEl.textContent = '✓ Normal (Ideal)';
+        badgeEl.style.background = 'var(--accent-lime)';
+        badgeEl.style.color = 'var(--accent-lime-text)';
+        adviceEl.textContent = `Bagus sekali! Berat badanmu dalam rentang ideal untuk tinggi badan ${bmiHeight} cm. Pertahankan rutinitas latihan 3–4× seminggu dan asupan gizi seimbang.`;
+      } else if (bmi <= 29.9) {
+        badgeEl.textContent = 'Kelebihan Bobot';
+        badgeEl.style.background = '#fdeee9';
+        badgeEl.style.color = '#ea580c';
+        adviceEl.textContent = `Indeks massa tubuhmu sedikit di atas batas normal. Tingkatkan latihan kardio harian (Lari, Sepeda) dan batasi konsumsi gula berlebih.`;
+      } else {
+        badgeEl.textContent = 'Obesitas';
+        badgeEl.style.background = '#fde2e4';
+        badgeEl.style.color = '#e11d48';
+        adviceEl.textContent = `Perhatikan kesehatan fisikmu dengan olahraga bertahap rendah dampak (Renang, Jalan Cepat) serta konsultasikan pola makan dengan ahli nutrisi.`;
+      }
+    }
+
+    function saveBmiRecord() {
+      const record = {
+        date: new Date().toLocaleDateString('id-ID'),
+        weight: bmiWeight,
+        height: bmiHeight,
+        bmi: document.getElementById('bmi-score-number').textContent,
+        category: document.getElementById('bmi-category-badge').textContent
+      };
+      savedBmiLogs.push(record);
+      localStorage.setItem('fittrack_bmi_logs', JSON.stringify(savedBmiLogs));
+      showToast(`Catatan BMI ${record.bmi} kg/m² berhasil disimpan ke riwayat!`);
+    }
+
+    /* ========================================================
+     * SCREEN 4: FOOD RECOVERY LOGIC
+     * ======================================================== */
+    function switchFoodTab(tabType) {
+      selectedFoodTab = tabType;
+      document.getElementById('food-tab-recovery').classList.toggle('active', tabType === 'heavy');
+      document.getElementById('food-tab-hydration').classList.toggle('active', tabType === 'snack');
+      renderFoodCardsDeck();
+    }
+
+    function renderFoodCardsDeck() {
+      const container = document.getElementById('food-cards-list');
+      const filtered = FOOD_DATA.filter(f => f.tab === selectedFoodTab);
+
+      container.innerHTML = filtered.map(item => `
+        <div class="food-card-item">
+          <div class="food-thumb-wrap">
+            <img class="food-thumb-img" src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80'" />
+            <button class="btn-fav-heart ${item.favorite ? 'active' : ''}" onclick="toggleFoodFav('${item.id}', this)" title="Simpan ke Favorit">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="${item.favorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
+          </div>
+          <div class="food-info-col">
+            <div class="food-cat-meta">${item.category}</div>
+            <div class="food-title-h4">${item.name}</div>
+            <div class="food-tags-duo">
+              <span class="badge-food-protein">${item.protein}</span>
+              <span class="badge-food-cal">${item.calories}</span>
+            </div>
+            <div class="food-brief-snippet">${item.desc}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleFoodFav(foodId, btn) {
+      const found = FOOD_DATA.find(f => f.id === foodId);
+      if (found) {
+        found.favorite = !found.favorite;
+        btn.classList.toggle('active', found.favorite);
+        const svg = btn.querySelector('svg');
+        svg.setAttribute('fill', found.favorite ? 'currentColor' : 'none');
+        showToast(found.favorite ? `${found.name} disimpan ke daftar favorit ❤️` : `Dihapus dari favorit.`);
+      }
+    }
+
+    function saveAllMenuToFavorites() {
+      FOOD_DATA.forEach(f => f.favorite = true);
+      renderFoodCardsDeck();
+      showToast('Semua menu pemulihan berhasil disimpan ke daftar favorit! 🔖');
+    }
+
+    /* ========================================================
+     * HISTORY MODAL & INTERACTION
+     * ======================================================== */
+    function openHistoryFullModal() {
+      document.getElementById('history-modal-sheet').classList.add('open');
+      renderFullHistoryList();
+    }
+
+    function closeHistoryFullModal() {
+      document.getElementById('history-modal-sheet').classList.remove('open');
+    }
+
+    function closeHistoryModalOutside(e) {
+      if (e.target.id === 'history-modal-sheet') {
+        closeHistoryFullModal();
+      }
+    }
+
+    function renderFullHistoryList() {
+      const container = document.getElementById('modal-history-list-items');
+      const query = (document.getElementById('history-search-input').value || '').toLowerCase();
+      const filterType = document.getElementById('history-type-filter').value;
+
+      const filtered = activities.filter(act => {
+        const matchesQuery = act.name.toLowerCase().includes(query);
+        const matchesType = filterType === 'all' || act.name.toLowerCase().includes(filterType.toLowerCase());
+        return matchesQuery && matchesType;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding: 30px 10px; color: var(--text-secondary);">
+            Tidak ada riwayat aktivitas yang cocok.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(act => {
+        const sport = SPORTS_DATA.find(s => s.id === act.sportId) || SPORTS_DATA[0];
+        return `
+          <div class="activity-item-card" style="margin-bottom:0;">
+            <div class="activity-icon-sq ${sport.color || 'green'}">
+              ${sport.iconSvg}
+            </div>
+            <div class="activity-details">
+              <div class="activity-name-row">${act.name}</div>
+              <div class="activity-meta-row">${act.duration} menit • ${act.calories} kkal</div>
+              <div class="activity-time-stamp">${act.dateFormatted}</div>
+            </div>
+            <button class="btn-round-back" style="width:30px; height:30px; color:#ef4444;" onclick="deleteActivityItem('${act.id}', event)" title="Hapus">
+              🗑
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteActivityItem(id, e) {
+      if (e) e.stopPropagation();
+      activities = activities.filter(a => a.id !== id);
+      saveActivitiesToStorage();
+      renderHomeScreenData();
+      renderFullHistoryList();
+      showToast('Aktivitas berhasil dihapus.');
+    }
+
+    function loadDemoSampleHistory() {
+      activities = [
+        ...DEFAULT_ACTIVITIES,
+        {
+          id: 'act_demo_1',
+          name: 'Renang Gaya Dada',
+          sportId: 'renang',
+          duration: 40,
+          calories: 360,
+          dateFormatted: '3 hari lalu, 16:00 WIB',
+          timestamp: Date.now() - 3600000 * 72
+        },
+        {
+          id: 'act_demo_2',
+          name: 'Beban / Gym Workout',
+          sportId: 'beban',
+          duration: 50,
+          calories: 275,
+          dateFormatted: '4 hari lalu, 18:30 WIB',
+          timestamp: Date.now() - 3600000 * 96
+        }
+      ];
+      saveActivitiesToStorage();
+      renderHomeScreenData();
+      renderFullHistoryList();
+      showToast('Data riwayat contoh berhasil dimuat!');
+    }
+
+    function resetAllHistoryData() {
+      if (!confirm('Apakah kamu yakin ingin mereset seluruh data riwayat?')) return;
+      activities = [];
+      saveActivitiesToStorage();
+      renderHomeScreenData();
+      renderFullHistoryList();
+      showToast('Seluruh riwayat berhasil direset.');
+    }
+
+    function openActivityDetailModal(id) {
+      const act = activities.find(a => a.id === id);
+      if (act) {
+        showToast(`${act.name}: ${act.duration} menit, membakar ${act.calories} kkal!`);
+      }
+    }
+
+    /* NOTIFICATION & USER PROFILE MODAL HELPERS */
+    function triggerNotificationSheet() {
+      showToast('Streak 5 hari aktif! Pertahankan konsistensi minggumu ✨');
+    }
+
+    function showUserProfileModal() {
+      showToast('Profil: Tasya • Status: Aktif & Prima');
+    }
+
+    /* TOAST POPUP NOTIFICATION */
+    function showToast(msg) {
+      const el = document.getElementById('app-toast');
+      document.getElementById('app-toast-text').textContent = msg;
+      el.classList.add('show');
+      clearTimeout(window._toastTimeout);
+      window._toastTimeout = setTimeout(() => {
+        el.classList.remove('show');
+      }, 3000);
+    }
+
+    // Run on startup
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
 </body>
+
 </html>

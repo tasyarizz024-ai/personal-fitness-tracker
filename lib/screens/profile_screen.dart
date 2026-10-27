@@ -1,263 +1,286 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
+import '../services/storage_service.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class ProfileScreen extends StatefulWidget {
+  final VoidCallback? onLogout;
+  const ProfileScreen({Key? key, this.onLogout}) : super(key: key);
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final StorageService _storageService = StorageService();
+  String _displayName = 'Pengguna';
+  String _username = '';
+  int _totalActivities = 0;
+  int _totalMinutes = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = await _storageService.getCurrentUser();
+    final activities = await _storageService.getActivities();
+    final minutes =
+        activities.fold<int>(0, (sum, a) => sum + a.durationMinutes);
+
+    if (mounted) {
+      setState(() {
+        _displayName = user?['name'] ?? 'Pengguna';
+        _username = user?['username'] ?? '';
+        _totalActivities = activities.length;
+        _totalMinutes = minutes;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Profil Saya'),
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.primary),
-        titleTextStyle: const TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        title: const Text('Profil Pengguna'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Profile Hero Section
-            Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary))
+          : SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Column(
                 children: [
-                  // Avatar with ring
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 106,
-                        height: 106,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.primary, width: 3),
-                        ),
-                      ),
-                      const CircleAvatar(
-                        radius: 48,
-                        backgroundColor: AppColors.secondary,
-                        child: Icon(Icons.person_rounded, size: 48, color: AppColors.primary),
-                      ),
-                      Positioned(
-                        bottom: 2,
-                        right: 2,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.edit_rounded, color: Colors.white, size: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Pengguna Aktif',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Tetap konsisten dan sehat! 💪',
-                    style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 20),
-                  // Stats Row
+                  // Profile Card
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(22),
                     decoration: BoxDecoration(
-                      color: AppColors.background,
+                      color: AppColors.cardSurface,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.cardBorder),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    child: Column(
                       children: [
-                        _buildStatItem('0', 'Aktivitas', Icons.fitness_center_rounded),
-                        _buildDivider(),
-                        _buildStatItem('0', 'Menit', Icons.timer_rounded),
-                        _buildDivider(),
-                        _buildStatItem('0', 'Hari Aktif', Icons.calendar_month_rounded),
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: AppColors.primary, width: 2.5),
+                            color: AppColors.primary.withOpacity(0.12),
+                          ),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            size: 44,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          _displayName,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '@$_username',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Tetap konsisten dan pantau target kebugaran harian.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        // Stats row
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: AppColors.cardAlt,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.cardBorder),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem('$_totalActivities', 'Aktivitas',
+                                  Icons.fitness_center_rounded),
+                              Container(
+                                  width: 1,
+                                  height: 32,
+                                  color: AppColors.cardBorder),
+                              _buildStatItem('$_totalMinutes', 'Menit',
+                                  Icons.timer_rounded),
+                              Container(
+                                  width: 1,
+                                  height: 32,
+                                  color: AppColors.cardBorder),
+                              _buildStatItem(
+                                  '150', 'Target (m)', Icons.flag_rounded),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
+
+                  const SizedBox(height: 18),
+
+                  // Settings Card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardSurface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'PENGATURAN & INFORMASI',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textMuted,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildMenuTile(
+                          icon: Icons.track_changes_rounded,
+                          title: 'Target Mingguan',
+                          subtitle: '150 menit aktivitas per minggu',
+                          accentColor: AppColors.primary,
+                        ),
+                        const Divider(color: AppColors.cardBorder, height: 16),
+                        _buildMenuTile(
+                          icon: Icons.shield_outlined,
+                          title: 'Penyimpanan Lokal',
+                          subtitle:
+                              'Data tersimpan terenkripsi pada sesi lokal',
+                          accentColor: AppColors.secondary,
+                        ),
+                        const Divider(color: AppColors.cardBorder, height: 16),
+                        _buildMenuTile(
+                          icon: Icons.info_outline_rounded,
+                          title: 'Versi Aplikasi',
+                          subtitle: 'FitTrack Mobile v1.0.0 (Release)',
+                          accentColor: AppColors.accentAmber,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  // Logout Button
+                  if (widget.onLogout != null)
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: widget.onLogout,
+                        icon: const Icon(Icons.logout_rounded,
+                            size: 18, color: AppColors.error),
+                        label: const Text('Keluar dari Akun',
+                            style: TextStyle(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                              color: AppColors.error.withOpacity(0.5)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
-
-            const SizedBox(height: 12),
-
-            // Settings Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4, bottom: 12),
-                    child: Text(
-                      'Pengaturan',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary, letterSpacing: 0.5),
-                    ),
-                  ),
-                  _buildProfileItem(
-                    icon: Icons.star_rounded,
-                    title: 'Target Mingguan',
-                    subtitle: '150 Menit',
-                    iconBg: const Color(0xFFFFF9C4),
-                    iconColor: const Color(0xFFF59E0B),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        '150 min',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                      ),
-                    ),
-                  ),
-                  _buildProfileItem(
-                    icon: Icons.notifications_rounded,
-                    title: 'Notifikasi',
-                    subtitle: 'Pengingat latihan harian',
-                    iconBg: const Color(0xFFE3F2FD),
-                    iconColor: const Color(0xFF1E88E5),
-                    trailing: Switch(
-                      value: true,
-                      onChanged: (_) {},
-                      activeColor: AppColors.primary,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
-                  _buildProfileItem(
-                    icon: Icons.info_rounded,
-                    title: 'Tentang Aplikasi',
-                    subtitle: 'Personal Fitness Tracker v1.0.0',
-                    iconBg: AppColors.background,
-                    iconColor: AppColors.primary,
-                  ),
-                  _buildProfileItem(
-                    icon: Icons.shield_rounded,
-                    title: 'Kebijakan Privasi',
-                    subtitle: 'Lihat kebijakan privasi kami',
-                    iconBg: const Color(0xFFE8F5E9),
-                    iconColor: AppColors.primary,
-                  ),
-                  const SizedBox(height: 20),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4, bottom: 12),
-                    child: Text(
-                      'Akun',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary, letterSpacing: 0.5),
-                    ),
-                  ),
-                  _buildProfileItem(
-                    icon: Icons.logout_rounded,
-                    title: 'Keluar',
-                    subtitle: 'Masuk dengan akun lain',
-                    iconBg: const Color(0xFFFFEBEE),
-                    iconColor: AppColors.error,
-                    textColor: AppColors.error,
-                    showChevron: false,
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildStatItem(String value, String label, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: AppColors.primary, size: 20),
-        const SizedBox(height: 6),
-        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        Icon(icon, color: AppColors.primary, size: 18),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
         const SizedBox(height: 2),
-        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+        ),
       ],
     );
   }
 
-  Widget _buildDivider() {
-    return Container(width: 1, height: 40, color: AppColors.background);
-  }
-
-  Widget _buildProfileItem({
+  Widget _buildMenuTile({
     required IconData icon,
     required String title,
     required String subtitle,
-    required Color iconBg,
-    required Color iconColor,
-    Color? textColor,
-    Widget? trailing,
-    bool showChevron = true,
+    required Color accentColor,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
-                  child: Icon(icon, color: iconColor, size: 20),
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: accentColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: accentColor, size: 18),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          color: textColor ?? AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                    ],
-                  ),
-                ),
-                if (trailing != null) trailing
-                else if (showChevron)
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-              ],
-            ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                    fontSize: 11, color: AppColors.textSecondary),
+              ),
+            ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

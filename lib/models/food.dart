@@ -2,24 +2,22 @@
 
 /// Model yang merepresentasikan satu item rekomendasi makanan pasca-olahraga.
 class FoodRecommendation {
-  /// Nama makanan atau minuman yang direkomendasikan.
+  final String id;
   final String name;
-
-  /// Kategori rekomendasi berdasarkan kebutuhan nutrisi.
-  /// Nilai yang disarankan:
-  ///   - 'Tinggi Protein'    : untuk pemulihan otot (kalori >= 300 kkal)
-  ///   - 'Tinggi Karbohidrat': untuk pemulihan energi (kalori >= 300 kkal)
-  ///   - 'Hidrasi'           : untuk olahraga ringan (kalori < 300 kkal)
   final String category;
-
-  /// Penjelasan singkat mengapa makanan ini direkomendasikan.
   final String description;
+  final String protein;
+  final String calories;
+  final String timing;
 
-  /// Membuat instance [FoodRecommendation] dengan semua parameter wajib diisi.
   const FoodRecommendation({
+    this.id = '',
     required this.name,
     required this.category,
     required this.description,
+    this.protein = '',
+    this.calories = '',
+    this.timing = '30-45 mnt pasca-latihan',
   });
 
   @override
@@ -28,93 +26,118 @@ class FoodRecommendation {
   }
 }
 
-/// Kumpulan data rekomendasi makanan siap pakai yang dapat digunakan
-/// oleh [FoodRecommendationScreen] tanpa perlu koneksi internet.
+/// Kumpulan data rekomendasi makanan siap pakai pasca-olahraga
 class FoodData {
-  FoodData._(); // Mencegah instansiasi
+  FoodData._();
 
   /// Rekomendasi untuk sesi olahraga berat (>= 300 kkal terbakar).
   static const List<FoodRecommendation> highCalorieBurned = [
     FoodRecommendation(
-      name: 'Dada Ayam Rebus',
+      id: 'food_1',
+      name: 'Dada Ayam Panggang & Nasi Merah',
       category: 'Tinggi Protein',
+      protein: '32g Protein',
+      calories: '420 kkal',
+      timing: '30-45 mnt pasca-latihan',
       description:
-          'Sumber protein lengkap rendah lemak, ideal untuk perbaikan serat '
-          'otot setelah latihan intensitas tinggi.',
+          'Sumber protein lengkap rendah lemak dipadukan karbohidrat kompleks. Ideal untuk perbaikan serat otot dan mengisi ulang glikogen setelah latihan intensitas tinggi.',
     ),
     FoodRecommendation(
-      name: 'Telur Rebus (2-3 butir)',
+      id: 'food_2',
+      name: 'Telur Rebus (2-3 butir) & Roti Gandum',
       category: 'Tinggi Protein',
+      protein: '14g Protein',
+      calories: '210 kkal',
+      timing: '20-40 mnt pasca-latihan',
       description:
-          'Mengandung protein berkualitas tinggi dan lemak sehat. Mudah '
-          'dicerna dan cepat diserap tubuh pasca-olahraga.',
+          'Mengandung protein berkualitas tinggi dan lemak sehat. Cepat diserap tubuh untuk merangsang sintesis protein otot tanpa lemak berlebih.',
     ),
     FoodRecommendation(
-      name: 'Nasi Merah + Tempe Goreng',
+      id: 'food_3',
+      name: 'Nasi Merah + Tempe & Tahu Panggang',
       category: 'Tinggi Karbohidrat',
+      protein: '18g Protein',
+      calories: '310 kkal',
+      timing: '30-60 mnt pasca-latihan',
       description:
-          'Kombinasi karbohidrat kompleks dan protein nabati untuk mengisi '
-          'kembali simpanan glikogen otot yang terkuras.',
+          'Kombinasi karbohidrat kompleks dan protein nabati untuk mengisi kembali simpanan glikogen otot serta menstabilkan metabolisme.',
     ),
     FoodRecommendation(
-      name: 'Smoothie Pisang dan Susu',
+      id: 'food_4',
+      name: 'Smoothie Pisang, Susu & Selai Kacang',
       category: 'Tinggi Karbohidrat',
+      protein: '16g Protein',
+      calories: '280 kkal',
+      timing: '15-30 mnt pasca-latihan',
       description:
-          'Karbohidrat cepat dari pisang membantu pemulihan energi, sementara '
-          'susu menyumbang protein dan kalsium.',
+          'Karbohidrat cepat dari pisang membantu pemulihan energi segera, sementara susu menyumbang protein kasein dan kalsium.',
     ),
     FoodRecommendation(
-      name: 'Greek Yogurt + Granola',
+      id: 'food_5',
+      name: 'Greek Yogurt + Granola & Berries',
       category: 'Tinggi Protein',
+      protein: '20g Protein',
+      calories: '260 kkal',
+      timing: '30 mnt pasca-latihan',
       description:
-          'Yogurt tinggi protein dan probiotik, dipadukan granola sebagai '
-          'sumber karbohidrat dan serat yang mengenyangkan.',
+          'Yogurt tinggi protein dan probiotik dipadukan granola renyah sebagai sumber karbohidrat dan serat yang mengenyangkan.',
     ),
   ];
 
   /// Rekomendasi untuk sesi olahraga ringan (< 300 kkal terbakar).
   static const List<FoodRecommendation> lowCalorieBurned = [
     FoodRecommendation(
-      name: 'Air Putih (500-750 ml)',
-      category: 'Hidrasi',
+      id: 'food_6',
+      name: 'Air Kelapa Muda Segar',
+      category: 'Hidrasi Elektrolit',
+      protein: '1g Protein',
+      calories: '45 kkal',
+      timing: 'Segera pasca-latihan',
       description:
-          'Menggantikan cairan tubuh yang hilang melalui keringat. Minum '
-          'secara bertahap, bukan sekaligus.',
+          'Mengandung elektrolit alami (kalium, natrium, magnesium) yang cepat menggantikan cairan tubuh dan mencegah kram otot.',
     ),
     FoodRecommendation(
-      name: 'Air Kelapa Muda',
-      category: 'Hidrasi',
+      id: 'food_7',
+      name: 'Buah Semangka Segar (2 Potong Tebal)',
+      category: 'Hidrasi & Anti-Kram',
+      protein: '2g Protein',
+      calories: '60 kkal',
+      timing: '10-20 mnt pasca-latihan',
       description:
-          'Mengandung elektrolit alami (kalium, natrium, magnesium) yang '
-          'membantu pemulihan dan mencegah kram otot.',
+          'Kandungan air ~92% membantu rehidrasi optimal. Mengandung L-citrulline alami yang efektif mengurangi nyeri otot.',
     ),
     FoodRecommendation(
-      name: 'Buah Semangka (2 potong)',
-      category: 'Hidrasi',
+      id: 'food_8',
+      name: 'Pisang Cavendish & 10 Butir Almond',
+      category: 'Camilan Sehat',
+      protein: '4g Protein',
+      calories: '150 kkal',
+      timing: '15-30 mnt pasca-latihan',
       description:
-          'Kandungan air ~92% membantu rehidrasi. Mengandung L-citrulline '
-          'yang dapat mengurangi nyeri otot.',
+          'Sumber kalium untuk menstabilkan denyut jantung serta asam lemak sehat dari almond untuk meredakan inflamasi ringan.',
     ),
     FoodRecommendation(
-      name: 'Pisang (1 buah)',
-      category: 'Hidrasi',
+      id: 'food_9',
+      name: 'Air Putih Rehidrasi Bertahap (750 ml)',
+      category: 'Hidrasi Primer',
+      protein: '0g Protein',
+      calories: '0 kkal',
+      timing: 'Sepanjang pemulihan',
       description:
-          'Sumber kalium dan karbohidrat sederhana yang cepat mengisi energi '
-          'setelah olahraga ringan.',
+          'Cairan vital untuk memulihkan volume plasma darah dan sirkulasi oksigen ke seluruh sel tubuh. Minum bertahap bukan sekaligus.',
     ),
     FoodRecommendation(
-      name: 'Teh Jahe Hangat',
-      category: 'Hidrasi',
+      id: 'food_10',
+      name: 'Teh Jahe Hangat & Madu Alami',
+      category: 'Hidrasi Anti-Inflamasi',
+      protein: '0g Protein',
+      calories: '35 kkal',
+      timing: '20-40 mnt pasca-latihan',
       description:
-          'Sifat anti-inflamasi jahe membantu meredakan nyeri otot ringan '
-          'dan menghangatkan tubuh pasca-olahraga.',
+          'Sifat anti-inflamasi alami dari gingerol membantu menghangatkan tubuh, merelaksasi otot yang tegang, dan mempercepat pemulihan.',
     ),
   ];
 
-  /// Mengembalikan daftar rekomendasi yang sesuai berdasarkan total kalori
-  /// yang terbakar dalam satu sesi olahraga.
-  ///
-  /// [caloriesBurned] : Total kalori terbakar (dari [Activity.caloriesBurned]).
   static List<FoodRecommendation> getRecommendations(double caloriesBurned) {
     if (caloriesBurned >= 300) {
       return highCalorieBurned;
